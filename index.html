@@ -245,10 +245,67 @@
       font-size: 11px;
       color: rgba(159,176,208,.75);
     }
+
+    /* SIMPLE PASSWORD GATE */
+    #gateOverlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(8px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    #gateCard{
+      width:min(520px, 92vw);
+      background: rgba(18,28,46,.98);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    #gateCard .gateHd{
+      padding: 14px var(--pad);
+      border-bottom:1px solid var(--line);
+      font-weight:800;
+    }
+    #gateCard .gateBd{
+      padding: var(--pad);
+    }
+    #gateCard .gateBd p{
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.4;
+    }
+    #gateError{
+      margin-top:10px;
+      color: var(--danger);
+      font-size: 12px;
+      display:none;
+    }
   </style>
 </head>
 
 <body>
+  <!-- Simple password gate (client-side) -->
+  <div id="gateOverlay" aria-hidden="false">
+    <div id="gateCard" role="dialog" aria-modal="true" aria-label="Password Gate">
+      <div class="gateHd">Protected Page</div>
+      <div class="gateBd">
+        <p>Enter the password to view and use the Prospect ID Log.</p>
+        <label for="gatePassword">Password</label>
+        <input id="gatePassword" type="password" placeholder="Enter password" autocomplete="current-password" />
+        <div class="actions" style="margin-top:12px;">
+          <button id="gateBtn" type="button">Unlock</button>
+        </div>
+        <div id="gateError">Incorrect password.</div>
+        <div class="small" style="margin-top:10px;">Tip: this stays unlocked until you close the tab.</div>
+      </div>
+    </div>
+  </div>
+
   <header>
     <h1>Prospect ID Log</h1>
     <p>Enter new install leads on the left. The log on the right is <strong>read-only</strong> and shows every entry from the starting ID onward (with reserved ranges skipped).</p>
@@ -266,8 +323,7 @@
           <div class="grid">
             <div>
               <label for="entered_by">Entered By</label>
-<input id="entered_by" name="entered_by" placeholder="Your name / initials" required />
-
+              <input id="entered_by" name="entered_by" placeholder="Your name / initials" required />
             </div>
 
             <div>
@@ -396,10 +452,9 @@
             </tr>
           </thead>
           <tbody id="logBody">
-            <!-- Filled by app.js later -->
             <tr>
               <td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">
-                No data loaded yet. Next step: add <code>app.js</code> + backend API to populate this log.
+                No data loaded yet. Next step: unlock the page to use it.
               </td>
             </tr>
           </tbody>
@@ -408,8 +463,8 @@
 
       <div class="statusBar">
         <div id="statusLeft">
-          Status: <span class="badge-warn">Not connected</span>
-          <span class="small">— table will populate once we add the API.</span>
+          Status: <span class="badge-warn">Locked</span>
+          <span class="small">— enter the password to use the page.</span>
         </div>
         <div id="statusRight" class="small">
           Showing: <span id="countShown">0</span> rows
@@ -418,7 +473,6 @@
     </section>
   </main>
 
-  <!-- We’ll create app.js next. Keeping this script tag now is helpful. -->
   <script src="app.js"></script>
 </body>
 </html>
