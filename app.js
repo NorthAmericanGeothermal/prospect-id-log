@@ -1,5 +1,5 @@
 /* app.js
-   v2: Adds a simple client-side password gate + keeps localStorage mode working immediately.
+   v3: Simple client-side password gate (plain compare) + localStorage log.
    NOTE: This is NOT truly secure on a static site (GitHub Pages). It is a basic "front door".
 */
 
@@ -13,29 +13,18 @@
   const STORAGE_KEY = "prospectIdLog.leads.v1";
   const COUNTER_KEY = "prospectIdLog.nextId.v1";
 
-  // Future backend endpoints (we’ll implement later)
-  // const API_BASE = "https://YOUR-WORKER.your-subdomain.workers.dev";
-  // const USE_BACKEND = true;
-  const USE_BACKEND = false; // keep false for now; localStorage mode
-
-  // ====== SIMPLE PASSWORD GATE (client-side) ======
-  // Hash of: Prospects2011!!#
-  // (Hashing avoids storing the plain password in this file, but it’s still client-side.)
-  const PW_HASH = "ca1f9cc8771aa8458554f3d53b96c89666a18280c0ce5f3ebc290c46224017fe";
+  // Simple password (client-side)
+  const PASSWORD = "Prospects2011!!#";
   const UNLOCK_KEY = "prospectIdLog.unlocked.session";
 
+  // Future backend (later)
+  const USE_BACKEND = false;
+
+  // ====== DOM (Gate) ======
   const gateOverlay = document.getElementById("gateOverlay");
   const gatePassword = document.getElementById("gatePassword");
   const gateBtn = document.getElementById("gateBtn");
   const gateError = document.getElementById("gateError");
-
-  async function sha256Hex(text) {
-    const enc = new TextEncoder().encode(text);
-    const buf = await crypto.subtle.digest("SHA-256", enc);
-    return Array.from(new Uint8Array(buf))
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
 
   function isUnlocked() {
     return sessionStorage.getItem(UNLOCK_KEY) === "1";
@@ -55,15 +44,13 @@
     if (gateOverlay) gateOverlay.style.display = "none";
   }
 
-  async function tryUnlock() {
+  function tryUnlock() {
     if (!gatePassword || !gateError) return;
 
     gateError.style.display = "none";
     const entered = (gatePassword.value || "").trim();
-    if (!entered) return;
 
-    const hash = await sha256Hex(entered);
-    if (hash === PW_HASH) {
+    if (entered === PASSWORD) {
       unlockUI();
       refresh(); // load once unlocked
     } else {
@@ -72,14 +59,23 @@
     }
   }
 
-  if (gateBtn) gateBtn.addEventListener("click", tryUnlock);
+  if (gateBtn) {
+    gateBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      tryUnlock();
+    });
+  }
   if (gatePassword) {
     gatePassword.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") tryUnlock();
+      if (e.key === "Enter") {
+        e.preventDefault();
+        tryUnlock();
+      }
     });
   }
 
-  // ====== DOM ======
+  // ====== DOM (Main app) ======
   const form = document.getElementById("leadForm");
   const submitBtn = document.getElementById("submitBtn");
 
@@ -93,8 +89,8 @@
   const downloadXlsxBtn = document.getElementById("downloadXlsxBtn");
 
   // ====== STATE ======
-  let allRows = [];     // full dataset
-  let visibleRows = []; // filtered dataset (rendered)
+  let allRows = [];
+  let visibleRows = [];
 
   // ====== HELPERS ======
   function todayISO() {
@@ -150,7 +146,6 @@
     const badge = connected
       ? `<span class="badge-ok">Connected</span>`
       : `<span class="badge-warn">Local mode</span>`;
-
     statusLeft.innerHTML = `Status: ${badge} <span class="small">${message}</span>`;
   }
 
@@ -223,11 +218,7 @@
 
   function applyFilter() {
     const q = normalize(searchBox.value).toLowerCase();
-    if (!q) {
-      visibleRows = [...allRows];
-    } else {
-      visibleRows = allRows.filter(r => rowToSearchString(r).includes(q));
-    }
+    visibleRows = !q ? [...allRows] : allRows.filter(r => rowToSearchString(r).includes(q));
     render(visibleRows);
   }
 
@@ -242,7 +233,6 @@
 
     return {
       prospect_id: "",
-
       entered_by: enteredBy,
       entered_date: enteredDate,
 
@@ -290,57 +280,20 @@
 
   function exportCSV(rows) {
     const headers = [
-      "Prospect ID",
-      "Entered By",
-      "Entered Date",
-      "Source",
-      "Builder Name",
-      "Builder Phone",
-      "First Name",
-      "Last Name",
-      "Street Address",
-      "City",
-      "State",
-      "Zip",
-      "Primary Phone",
-      "Contact Email",
-      "Notes",
+      "Prospect ID","Entered By","Entered Date","Source","Builder Name","Builder Phone",
+      "First Name","Last Name","Street Address","City","State","Zip","Primary Phone","Contact Email","Notes"
     ];
 
-    const lines = [];
-    lines.push(headers.join(","));
-
+    const lines = [headers.join(",")];
     for (const r of rows) {
       const line = [
-        r.prospect_id,
-        r.entered_by,
-        r.entered_date,
-        r.source,
-        r.builder_name,
-        r.builder_phone,
-        r.first_name,
-        r.last_name,
-        r.street_address,
-        r.city,
-        r.state,
-        r.zip,
-        r.primary_phone,
-        r.contact_email,
-        r.notes,
+        r.prospect_id, r.entered_by, r.entered_date, r.source, r.builder_name, r.builder_phone,
+        r.first_name, r.last_name, r.street_address, r.city, r.state, r.zip, r.primary_phone,
+        r.contact_email, r.notes
       ].map(csvEscape).join(",");
       lines.push(line);
     }
-
     return lines.join("\n");
-  }
-
-  // ====== BACKEND PLACEHOLDERS (not used yet) ======
-  async function apiListLeads() {
-    throw new Error("Backend not enabled yet.");
-  }
-
-  async function apiCreateLead(payload) {
-    throw new Error("Backend not enabled yet.");
   }
 
   // ====== CORE ACTIONS ======
@@ -357,22 +310,7 @@
 
   async function refresh() {
     if (!USE_BACKEND) return refreshLocal();
-
-    try {
-      setStatus(true, "— loading from API…");
-      const data = await apiListLeads();
-      allRows = sortNewestFirst(data.map(r => ({
-        ...r,
-        prospect_id: r.prospect_id?.toString() ?? "",
-        _id_num: Number(r.prospect_id) || 0,
-      })));
-      applyFilter();
-      setStatus(true, "— live data loaded.");
-    } catch (err) {
-      console.error(err);
-      setStatus(false, "— failed to load from API, staying in local mode.");
-      refreshLocal();
-    }
+    // backend later
   }
 
   async function handleSubmit(e) {
@@ -391,30 +329,17 @@
         return;
       }
 
-      if (!USE_BACKEND) {
-        const assigned = getNextIdLocal();
-        row.prospect_id = String(assigned);
-        row._id_num = assigned;
+      const assigned = getNextIdLocal();
+      row.prospect_id = String(assigned);
+      row._id_num = assigned;
 
-        const existing = loadRowsLocal();
-        existing.push(row);
-        saveRowsLocal(existing);
+      const existing = loadRowsLocal();
+      existing.push(row);
+      saveRowsLocal(existing);
 
-        form.reset();
-        await refresh();
-        alert(`Created Prospect ID: ${format5(assigned)}`);
-        return;
-      }
-
-      const payload = { ...row };
-      delete payload.prospect_id;
-      delete payload._id_num;
-      delete payload._created_at;
-
-      const created = await apiCreateLead(payload);
       form.reset();
       await refresh();
-      alert(`Created Prospect ID: ${format5(Number(created.prospect_id))}`);
+      alert(`Created Prospect ID: ${format5(assigned)}`);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Lead";
@@ -433,13 +358,8 @@
 
   // ====== WIRE EVENTS ======
   form.addEventListener("submit", handleSubmit);
-
-  searchBox.addEventListener("input", () => {
-    applyFilter();
-  });
-
-  refreshBtn.addEventListener("click", () => refresh());
-
+  searchBox.addEventListener("input", applyFilter);
+  refreshBtn.addEventListener("click", refresh);
   downloadCsvBtn.addEventListener("click", handleDownloadCSV);
   downloadXlsxBtn.addEventListener("click", handleDownloadXlsx);
 
