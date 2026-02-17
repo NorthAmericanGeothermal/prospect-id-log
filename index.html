@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prospect ID Log</title>
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#121c2e;
+      --panel2:#0f1727;
+      --text:#e7eefc;
+      --muted:#9fb0d0;
+      --line:rgba(255,255,255,.10);
+      --accent:#66c2ff;
+      --danger:#ff6b6b;
+      --ok:#77e0a3;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:14px;
+      --pad:16px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(102,194,255,.18), transparent 60%),
+                  radial-gradient(1200px 800px at 90% 20%, rgba(119,224,163,.14), transparent 60%),
+                  var(--bg);
+    }
+
+    header{
+      padding: 22px 18px 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header h1{
+      margin: 0 0 6px;
+      font-size: 22px;
+      letter-spacing: .2px;
+    }
+    header p{
+      margin:0;
+      color:var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 18px 28px;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 980px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card .hd{
+      padding: 14px var(--pad);
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .card .hd .title{
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing:.3px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+
+    .pill{
+      font-size: 12px;
+      color: var(--muted);
+      border:1px solid var(--line);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.18);
+    }
+
+    .card .bd{
+      padding: var(--pad);
+    }
+
+    label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input, select{
+      width:100%;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline: none;
+    }
+
+    input::placeholder{ color: rgba(159,176,208,.65); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-1{ grid-template-columns: 1fr; }
+    .grid-3{ grid-template-columns: 1fr 1fr 1fr; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    button{
+      border: 1px solid var(--line);
+      background: rgba(102,194,255,.18);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+    button.secondary{
+      background: rgba(255,255,255,.05);
+    }
+    button.danger{
+      background: rgba(255,107,107,.18);
+    }
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* LOG TABLE */
+    .logShell{
+      height: calc(100vh - 150px);
+      min-height: 520px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .logTools{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .logTools input{
+      width: 240px;
+      max-width: 100%;
+      padding: 9px 11px;
+    }
+
+    .tableWrap{
+      flex:1;
+      overflow:auto;
+      background: rgba(0,0,0,.12);
+    }
+
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1120px;
+    }
+
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(18,28,46,.96);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      text-align:left;
+      padding: 10px 10px;
+      white-space: nowrap;
+    }
+
+    tbody td{
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: 10px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover td{
+      background: rgba(102,194,255,.06);
+    }
+
+    .statusBar{
+      padding: 10px var(--pad);
+      border-top: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(255,255,255,.02);
+    }
+
+    .badge-ok{ color: var(--ok); }
+    .badge-warn{ color: #ffd166; }
+
+    .small{
+      font-size: 11px;
+      color: rgba(159,176,208,.75);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Prospect ID Log</h1>
+    <p>Enter new install leads on the left. The log on the right is <strong>read-only</strong> and shows every entry from the starting ID onward (with reserved ranges skipped).</p>
+  </header>
+
+  <main class="wrap">
+    <!-- LEFT: ENTRY FORM -->
+    <section class="card">
+      <div class="hd">
+        <div class="title">New Lead Entry <span class="pill">Creates next 5-digit Prospect ID</span></div>
+      </div>
+
+      <div class="bd">
+        <form id="leadForm" autocomplete="off">
+          <div class="grid">
+            <div>
+              <label for="entered_by">Entered By</label>
+              <select id="entered_by" name="entered_by" required>
+                <option value="" selected disabled>Select…</option>
+                <option>Michael</option>
+                <option>Office</option>
+                <option>Sales</option>
+                <option>Dispatch</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="entered_date">Entered Date (optional)</label>
+              <input id="entered_date" name="entered_date" placeholder="Leave blank to auto-fill today (YYYY-MM-DD)" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="source">Source</label>
+              <input id="source" name="source" placeholder="Builder / Referral / Web / etc." required />
+            </div>
+
+            <div>
+              <label for="primary_phone">Primary Phone</label>
+              <input id="primary_phone" name="primary_phone" placeholder="(###) ###-####" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="builder_name">Builder Name</label>
+              <input id="builder_name" name="builder_name" placeholder="Builder / Company name" />
+            </div>
+
+            <div>
+              <label for="builder_phone">Builder Phone</label>
+              <input id="builder_phone" name="builder_phone" placeholder="(###) ###-####" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="first_name">First Name</label>
+              <input id="first_name" name="first_name" />
+            </div>
+
+            <div>
+              <label for="last_name">Last Name</label>
+              <input id="last_name" name="last_name" />
+            </div>
+          </div>
+
+          <div class="grid-1 grid">
+            <div>
+              <label for="street_address">Street Address</label>
+              <input id="street_address" name="street_address" placeholder="123 Main St" />
+            </div>
+          </div>
+
+          <div class="grid-3 grid">
+            <div>
+              <label for="city">City</label>
+              <input id="city" name="city" />
+            </div>
+            <div>
+              <label for="state">State</label>
+              <input id="state" name="state" placeholder="VA" />
+            </div>
+            <div>
+              <label for="zip">Zip</label>
+              <input id="zip" name="zip" placeholder="22030" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="contact_email">Contact Email</label>
+              <input id="contact_email" name="contact_email" placeholder="name@email.com" />
+            </div>
+
+            <div>
+              <label for="notes">Notes (optional)</label>
+              <input id="notes" name="notes" placeholder="Anything useful (optional)" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="submitBtn">Submit Lead</button>
+            <button type="reset" class="secondary">Clear</button>
+          </div>
+
+          <div class="hint">
+            <div class="small">
+              • Prospect ID is assigned automatically (starting at <strong>22807</strong>).<br/>
+              • Reserved range is skipped: <strong>50000–69999</strong> → jumps to <strong>70001</strong>.<br/>
+              • “Entered Date” auto-fills if left blank.
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- RIGHT: READ-ONLY LOG -->
+    <section class="card logShell">
+      <div class="hd">
+        <div class="title">Prospect ID Log <span class="pill">Read-only</span></div>
+        <div class="logTools">
+          <input id="searchBox" placeholder="Search ID / name / builder / phone…" />
+          <button id="refreshBtn" class="secondary" type="button">Refresh</button>
+          <button id="downloadCsvBtn" class="secondary" type="button">Download CSV</button>
+          <button id="downloadXlsxBtn" class="secondary" type="button">Download Excel</button>
+        </div>
+      </div>
+
+      <div class="tableWrap" aria-label="Read-only Prospect ID table">
+        <table id="logTable">
+          <thead>
+            <tr>
+              <th>Prospect ID</th>
+              <th>Entered By</th>
+              <th>Entered Date</th>
+              <th>Source</th>
+              <th>Builder Name</th>
+              <th>Builder Phone</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Street Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Zip</th>
+              <th>Primary Phone</th>
+              <th>Contact Email</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            <!-- Filled by app.js later -->
+            <tr>
+              <td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">
+                No data loaded yet. Next step: add <code>app.js</code> + backend API to populate this log.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="statusBar">
+        <div id="statusLeft">
+          Status: <span class="badge-warn">Not connected</span>
+          <span class="small">— table will populate once we add the API.</span>
+        </div>
+        <div id="statusRight" class="small">
+          Showing: <span id="countShown">0</span> rows
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- We’ll create app.js next. Keeping this script tag now is helpful. -->
+  <script src="app.js"></script>
+</body>
+</html>
