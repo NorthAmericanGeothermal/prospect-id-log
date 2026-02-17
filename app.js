@@ -1,6 +1,6 @@
 /* app.js
-   v1: Works immediately on GitHub Pages (no backend) using localStorage.
-   Later we’ll swap storage + ID generation to a backend API (Cloudflare Worker) safely.
+   v2: Adds a simple client-side password gate + keeps localStorage mode working immediately.
+   NOTE: This is NOT truly secure on a static site (GitHub Pages). It is a basic "front door".
 */
 
 (() => {
@@ -16,8 +16,68 @@
   // Future backend endpoints (we’ll implement later)
   // const API_BASE = "https://YOUR-WORKER.your-subdomain.workers.dev";
   // const USE_BACKEND = true;
-
   const USE_BACKEND = false; // keep false for now; localStorage mode
+
+  // ====== SIMPLE PASSWORD GATE (client-side) ======
+  // Hash of: Prospects2011!!#
+  // (Hashing avoids storing the plain password in this file, but it’s still client-side.)
+  const PW_HASH = "ca1f9cc8771aa8458554f3d53b96c89666a18280c0ce5f3ebc290c46224017fe";
+  const UNLOCK_KEY = "prospectIdLog.unlocked.session";
+
+  const gateOverlay = document.getElementById("gateOverlay");
+  const gatePassword = document.getElementById("gatePassword");
+  const gateBtn = document.getElementById("gateBtn");
+  const gateError = document.getElementById("gateError");
+
+  async function sha256Hex(text) {
+    const enc = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  function isUnlocked() {
+    return sessionStorage.getItem(UNLOCK_KEY) === "1";
+  }
+
+  function lockUI() {
+    if (gateOverlay) gateOverlay.style.display = "flex";
+    if (gateError) gateError.style.display = "none";
+    if (gatePassword) {
+      gatePassword.value = "";
+      setTimeout(() => gatePassword.focus(), 0);
+    }
+  }
+
+  function unlockUI() {
+    sessionStorage.setItem(UNLOCK_KEY, "1");
+    if (gateOverlay) gateOverlay.style.display = "none";
+  }
+
+  async function tryUnlock() {
+    if (!gatePassword || !gateError) return;
+
+    gateError.style.display = "none";
+    const entered = (gatePassword.value || "").trim();
+    if (!entered) return;
+
+    const hash = await sha256Hex(entered);
+    if (hash === PW_HASH) {
+      unlockUI();
+      refresh(); // load once unlocked
+    } else {
+      gateError.style.display = "block";
+      gatePassword.select();
+    }
+  }
+
+  if (gateBtn) gateBtn.addEventListener("click", tryUnlock);
+  if (gatePassword) {
+    gatePassword.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") tryUnlock();
+    });
+  }
 
   // ====== DOM ======
   const form = document.getElementById("leadForm");
@@ -55,7 +115,6 @@
   }
 
   function format5(id) {
-    // You said 5 digits. If you ever go >99999, we can adjust.
     return String(id).padStart(5, "0");
   }
 
@@ -96,7 +155,6 @@
   }
 
   function rowToSearchString(r) {
-    // Include all user-facing fields for search
     return [
       r.prospect_id,
       r.entered_by,
@@ -126,7 +184,6 @@
   }
 
   function render(rows) {
-    // Clear
     logBody.innerHTML = "";
 
     if (!rows.length) {
@@ -175,7 +232,6 @@
   }
 
   function sortNewestFirst(rows) {
-    // Newest first by numeric ID (since ID is monotonic)
     return [...rows].sort((a, b) => Number(b._id_num) - Number(a._id_num));
   }
 
@@ -184,9 +240,9 @@
     const enteredDateRaw = normalize(formData.get("entered_date"));
     const enteredDate = enteredDateRaw ? enteredDateRaw : todayISO();
 
-    const row = {
-      // will fill prospect_id later
+    return {
       prospect_id: "",
+
       entered_by: enteredBy,
       entered_date: enteredDate,
 
@@ -203,19 +259,14 @@
       contact_email: normalize(formData.get("contact_email")),
       notes: normalize(formData.get("notes")),
 
-      // internal for sorting
       _id_num: 0,
       _created_at: new Date().toISOString(),
     };
-
-    return row;
   }
 
   function validateRowBasic(row) {
-    // Minimal validation (keep light for now)
     if (!row.entered_by) return "Entered By is required.";
     if (!row.source) return "Source is required.";
-    // entered_date optional (we auto fill)
     return "";
   }
 
@@ -285,29 +336,16 @@
 
   // ====== BACKEND PLACEHOLDERS (not used yet) ======
   async function apiListLeads() {
-    // When we add backend:
-    // const res = await fetch(`${API_BASE}/api/leads?fromId=${START_ID}&limit=500&sort=desc`);
-    // if (!res.ok) throw new Error(await res.text());
-    // return await res.json();
     throw new Error("Backend not enabled yet.");
   }
 
   async function apiCreateLead(payload) {
-    // When we add backend:
-    // const res = await fetch(`${API_BASE}/api/leads`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(payload),
-    // });
-    // if (!res.ok) throw new Error(await res.text());
-    // return await res.json(); // { prospect_id: 22807 }
     throw new Error("Backend not enabled yet.");
   }
 
   // ====== CORE ACTIONS ======
   function refreshLocal() {
     const rows = loadRowsLocal();
-    // Ensure numeric field exists (older saved data safety)
     for (const r of rows) {
       const n = Number((r.prospect_id ?? "").toString());
       r._id_num = Number.isFinite(n) ? n : (r._id_num ?? 0);
@@ -323,7 +361,6 @@
     try {
       setStatus(true, "— loading from API…");
       const data = await apiListLeads();
-      // expect array of objects; normalize to our keys
       allRows = sortNewestFirst(data.map(r => ({
         ...r,
         prospect_id: r.prospect_id?.toString() ?? "",
@@ -369,7 +406,6 @@
         return;
       }
 
-      // Backend flow (later)
       const payload = { ...row };
       delete payload.prospect_id;
       delete payload._id_num;
@@ -386,15 +422,12 @@
   }
 
   function handleDownloadCSV() {
-    // download currently visible rows (filtered results)
     const csv = exportCSV(visibleRows);
     const filename = `prospect_id_log_${todayISO()}.csv`;
     downloadBlob(filename, "text/csv;charset=utf-8", csv);
   }
 
   function handleDownloadXlsx() {
-    // Not possible purely static without libraries or backend generation.
-    // We’ll wire this to backend export later.
     alert("Excel download will be enabled when we add the backend export endpoint. CSV works now.");
   }
 
@@ -402,7 +435,6 @@
   form.addEventListener("submit", handleSubmit);
 
   searchBox.addEventListener("input", () => {
-    // Simple, fast filtering
     applyFilter();
   });
 
@@ -412,5 +444,10 @@
   downloadXlsxBtn.addEventListener("click", handleDownloadXlsx);
 
   // ====== INIT ======
-  refresh();
+  if (isUnlocked()) {
+    if (gateOverlay) gateOverlay.style.display = "none";
+    refresh();
+  } else {
+    lockUI();
+  }
 })();
