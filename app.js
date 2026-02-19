@@ -1,21 +1,15 @@
-/* app.js
-   v4: Uses Cloudflare Worker + D1 for shared cloud storage across computers.
-   Keeps simple client-side password gate.
-*/
-
 (() => {
   // ====== CONFIG ======
-  const START_ID = 22807;
-
-  // Cloud API base (your deployed Worker)
   const API_BASE = "https://prospect-id-cloud.nagprospects.workers.dev";
-  const USE_BACKEND = true;
+
+  const START_PROSPECT_ID = 22807;
+  const START_SERVICE_ID = 60000;
 
   // Simple password (client-side)
   const PASSWORD = "Prospects2011!!#";
-  const UNLOCK_KEY = "prospectIdLog.unlocked.session";
+  const UNLOCK_KEY = "idLogs.unlocked.session";
 
-  // ====== DOM (Gate) ======
+  // ====== DOM: Gate ======
   const gateOverlay = document.getElementById("gateOverlay");
   const gatePassword = document.getElementById("gatePassword");
   const gateBtn = document.getElementById("gateBtn");
@@ -41,13 +35,13 @@
 
   function tryUnlock() {
     if (!gatePassword || !gateError) return;
-
     gateError.style.display = "none";
     const entered = (gatePassword.value || "").trim();
-
     if (entered === PASSWORD) {
       unlockUI();
-      refresh(); // load once unlocked
+      refreshProspects();
+      refreshService();
+      setStatusesConnected();
     } else {
       gateError.style.display = "block";
       gatePassword.select();
@@ -70,65 +64,26 @@
     });
   }
 
-  // ====== DOM (Main app) ======
-  const form = document.getElementById("leadForm");
-  const submitBtn = document.getElementById("submitBtn");
+  // ====== Tabs ======
+  const tabProspects = document.getElementById("tabProspects");
+  const tabService = document.getElementById("tabService");
+  const viewProspects = document.getElementById("viewProspects");
+  const viewService = document.getElementById("viewService");
 
-  const logBody = document.getElementById("logBody");
-  const countShown = document.getElementById("countShown");
-  const statusLeft = document.getElementById("statusLeft");
-
-  const searchBox = document.getElementById("searchBox");
-  const refreshBtn = document.getElementById("refreshBtn");
-  const downloadCsvBtn = document.getElementById("downloadCsvBtn");
-  const downloadXlsxBtn = document.getElementById("downloadXlsxBtn");
-
-  // ====== STATE ======
-  let allRows = [];
-  let visibleRows = [];
-
-  // ====== HELPERS ======
-  function todayISO() {
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+  function setTab(which) {
+    const isPros = which === "prospects";
+    tabProspects.classList.toggle("active", isPros);
+    tabService.classList.toggle("active", !isPros);
+    viewProspects.classList.toggle("hidden", !isPros);
+    viewService.classList.toggle("hidden", isPros);
   }
 
+  tabProspects.addEventListener("click", () => setTab("prospects"));
+  tabService.addEventListener("click", () => setTab("service"));
+
+  // ====== Shared helpers ======
   function normalize(str) {
     return (str ?? "").toString().trim();
-  }
-
-  function format5(id) {
-    return String(id).padStart(5, "0");
-  }
-
-  function setStatus(connected, message = "") {
-    const badge = connected
-      ? `<span class="badge-ok">Connected</span>`
-      : `<span class="badge-warn">Not connected</span>`;
-    statusLeft.innerHTML = `Status: ${badge} <span class="small">${message}</span>`;
-  }
-
-  function rowToSearchString(r) {
-    return [
-      r.prospect_id,
-      r.entered_by,
-      r.entered_date,
-      r.source,
-      r.builder_name,
-      r.builder_phone,
-      r.first_name,
-      r.last_name,
-      r.street_address,
-      r.city,
-      r.state,
-      r.zip,
-      r.primary_phone,
-      r.contact_email,
-      r.notes,
-    ].join(" ").toLowerCase();
   }
 
   function escapeHtml(s) {
@@ -140,23 +95,63 @@
       .replaceAll("'", "&#039;");
   }
 
-  function render(rows) {
-    logBody.innerHTML = "";
+  function formatProspectId(id) {
+    const n = Number(id);
+    if (!Number.isFinite(n)) return String(id);
+    return String(n).padStart(5, "0");
+  }
 
+  function setStatusesConnected() {
+    const statusLeft = document.getElementById("statusLeft");
+    const svcStatusLeft = document.getElementById("svcStatusLeft");
+    if (statusLeft) statusLeft.innerHTML = `Status: <span class="badge-ok">Connected</span> <span class="small">— cloud storage</span>`;
+    if (svcStatusLeft) svcStatusLeft.innerHTML = `Status: <span class="badge-ok">Connected</span> <span class="small">— cloud storage</span>`;
+  }
+
+  async function fetchJson(url, options) {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(txt || `HTTP ${res.status}`);
+    }
+    return await res.json();
+  }
+
+  // ======================================================
+  // Prospects (existing)
+  // ======================================================
+  const leadForm = document.getElementById("leadForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const searchBox = document.getElementById("searchBox");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+  const logBody = document.getElementById("logBody");
+  const countShown = document.getElementById("countShown");
+
+  let prospectAll = [];
+  let prospectVisible = [];
+
+  function prospectSearchString(r) {
+    return [
+      r.prospect_id, r.entered_by, r.entered_date, r.source,
+      r.builder_name, r.builder_phone,
+      r.first_name, r.last_name,
+      r.street_address, r.city, r.state, r.zip,
+      r.primary_phone, r.contact_email, r.notes
+    ].join(" ").toLowerCase();
+  }
+
+  function renderProspects(rows) {
+    logBody.innerHTML = "";
     if (!rows.length) {
-      logBody.innerHTML = `
-        <tr>
-          <td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">
-            No entries yet. Submit a lead on the left to start the log.
-          </td>
-        </tr>`;
+      logBody.innerHTML = `<tr><td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">No entries yet.</td></tr>`;
       countShown.textContent = "0";
       return;
     }
 
-    const html = rows.map(r => `
+    logBody.innerHTML = rows.map(r => `
       <tr>
-        <td>${escapeHtml(r.prospect_id)}</td>
+        <td>${escapeHtml(formatProspectId(r.prospect_id))}</td>
         <td>${escapeHtml(r.entered_by)}</td>
         <td>${escapeHtml(r.entered_date)}</td>
         <td>${escapeHtml(r.source)}</td>
@@ -174,145 +169,179 @@
       </tr>
     `).join("");
 
-    logBody.innerHTML = html;
     countShown.textContent = String(rows.length);
   }
 
-  function applyFilter() {
+  function applyProspectFilter() {
     const q = normalize(searchBox.value).toLowerCase();
-    visibleRows = !q ? [...allRows] : allRows.filter(r => rowToSearchString(r).includes(q));
-    render(visibleRows);
+    prospectVisible = !q ? [...prospectAll] : prospectAll.filter(r => prospectSearchString(r).includes(q));
+    renderProspects(prospectVisible);
   }
 
-  function sortNewestFirst(rows) {
-    return [...rows].sort((a, b) => Number(b.prospect_id) - Number(a.prospect_id));
+  async function refreshProspects() {
+    if (!isUnlocked()) return;
+    const url = `${API_BASE}/api/leads?fromId=${START_PROSPECT_ID}&limit=800&sort=desc`;
+    const data = await fetchJson(url, { method: "GET" });
+    prospectAll = [...(data || [])].sort((a, b) => Number(b.prospect_id) - Number(a.prospect_id));
+    applyProspectFilter();
   }
 
-  function buildPayloadFromForm(formData) {
-    const enteredDateRaw = normalize(formData.get("entered_date"));
-    const entered_date = enteredDateRaw ? enteredDateRaw : ""; // backend auto-fills if blank
-
-    return {
-      entered_by: normalize(formData.get("entered_by")),
-      entered_date,
-      source: normalize(formData.get("source")),
-
-      builder_name: normalize(formData.get("builder_name")),
-      builder_phone: normalize(formData.get("builder_phone")),
-
-      first_name: normalize(formData.get("first_name")),
-      last_name: normalize(formData.get("last_name")),
-
-      street_address: normalize(formData.get("street_address")),
-      city: normalize(formData.get("city")),
-      state: normalize(formData.get("state")),
-      zip: normalize(formData.get("zip")),
-
-      primary_phone: normalize(formData.get("primary_phone")),
-      contact_email: normalize(formData.get("contact_email")),
-
-      notes: normalize(formData.get("notes")),
-    };
-  }
-
-  function validatePayloadBasic(payload) {
-    if (!payload.entered_by) return "Entered By is required.";
-    if (!payload.source) return "Source is required.";
-    return "";
-  }
-
-  // ====== API ======
-  async function apiListLeads() {
-    const url = `${API_BASE}/api/leads?fromId=${START_ID}&limit=500&sort=desc`;
-    const res = await fetch(url, { method: "GET" });
-    if (!res.ok) throw new Error(await res.text());
-    return await res.json();
-  }
-
-  async function apiCreateLead(payload) {
-    const res = await fetch(`${API_BASE}/api/leads`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return await res.json(); // { prospect_id: #### }
-  }
-
-  function apiExportCsvUrl() {
-    return `${API_BASE}/api/export.csv?fromId=${START_ID}&sort=asc`;
-  }
-
-  // ====== CORE ACTIONS ======
-  async function refresh() {
-    if (!USE_BACKEND) return;
-
-    try {
-      setStatus(true, "— loading from cloud…");
-      const data = await apiListLeads();
-      allRows = sortNewestFirst((data || []).map(r => ({
-        ...r,
-        prospect_id: (r.prospect_id ?? "").toString(),
-      })));
-      applyFilter();
-      setStatus(true, "— cloud data loaded.");
-    } catch (err) {
-      console.error(err);
-      setStatus(false, "— failed to load cloud data (check Worker URL / CORS).");
-      // Keep existing table if any
-    }
-  }
-
-  async function handleSubmit(e) {
+  async function submitProspect(e) {
     e.preventDefault();
+    if (!isUnlocked()) return;
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting…";
 
     try {
-      const fd = new FormData(form);
-      const payload = buildPayloadFromForm(fd);
+      const fd = new FormData(leadForm);
+      const payload = Object.fromEntries(fd.entries());
+      payload.entered_by = normalize(payload.entered_by);
+      payload.source = normalize(payload.source);
 
-      const error = validatePayloadBasic(payload);
-      if (error) {
-        alert(error);
-        return;
-      }
+      if (!payload.entered_by) throw new Error("Entered By is required.");
+      if (!payload.source) throw new Error("Source is required.");
 
-      const created = await apiCreateLead(payload);
-      form.reset();
-      await refresh();
+      const created = await fetchJson(`${API_BASE}/api/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      alert(`Created Prospect ID: ${format5(Number(created.prospect_id))}`);
+      leadForm.reset();
+      await refreshProspects();
+      alert(`Created Prospect ID: ${formatProspectId(created.prospect_id)}`);
     } catch (err) {
-      console.error(err);
-      alert("Submit failed. Check your internet connection and try again.");
+      alert(`Submit failed: ${err.message}`);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Lead";
     }
   }
 
-  function handleDownloadCSV() {
-    // Open CSV directly from backend (always up to date)
-    window.open(apiExportCsvUrl(), "_blank", "noopener,noreferrer");
+  function downloadProspectCSV() {
+    window.open(`${API_BASE}/api/export.csv?fromId=${START_PROSPECT_ID}&sort=asc`, "_blank", "noopener,noreferrer");
   }
 
-  function handleDownloadXlsx() {
-    alert("Excel download will be enabled next (we'll add /api/export.xlsx). CSV works now.");
+  leadForm.addEventListener("submit", submitProspect);
+  searchBox.addEventListener("input", applyProspectFilter);
+  refreshBtn.addEventListener("click", refreshProspects);
+  downloadCsvBtn.addEventListener("click", downloadProspectCSV);
+
+  // ======================================================
+  // Service Customers (new)
+  // ======================================================
+  const serviceForm = document.getElementById("serviceForm");
+  const serviceSubmitBtn = document.getElementById("serviceSubmitBtn");
+  const svcSearchBox = document.getElementById("svcSearchBox");
+  const svcRefreshBtn = document.getElementById("svcRefreshBtn");
+  const svcDownloadCsvBtn = document.getElementById("svcDownloadCsvBtn");
+  const svcBody = document.getElementById("svcBody");
+  const svcCountShown = document.getElementById("svcCountShown");
+
+  let serviceAll = [];
+  let serviceVisible = [];
+
+  function serviceSearchString(r) {
+    return [
+      r.service_id, r.first_name, r.last_name,
+      r.street_address, r.city, r.state, r.zip,
+      r.primary_phone, r.cell_phone, r.work_phone,
+      r.contact_email, r.notes
+    ].join(" ").toLowerCase();
   }
 
-  // ====== WIRE EVENTS ======
-  form.addEventListener("submit", handleSubmit);
-  searchBox.addEventListener("input", applyFilter);
-  refreshBtn.addEventListener("click", refresh);
-  downloadCsvBtn.addEventListener("click", handleDownloadCSV);
-  downloadXlsxBtn.addEventListener("click", handleDownloadXlsx);
+  function renderService(rows) {
+    svcBody.innerHTML = "";
+    if (!rows.length) {
+      svcBody.innerHTML = `<tr><td colspan="12" style="padding:14px; color: rgba(159,176,208,.85);">No entries yet.</td></tr>`;
+      svcCountShown.textContent = "0";
+      return;
+    }
 
-  // ====== INIT ======
+    svcBody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${escapeHtml(r.service_id)}</td>
+        <td>${escapeHtml(r.first_name)}</td>
+        <td>${escapeHtml(r.last_name)}</td>
+        <td>${escapeHtml(r.street_address)}</td>
+        <td>${escapeHtml(r.city)}</td>
+        <td>${escapeHtml(r.state)}</td>
+        <td>${escapeHtml(r.zip)}</td>
+        <td>${escapeHtml(r.primary_phone)}</td>
+        <td>${escapeHtml(r.cell_phone)}</td>
+        <td>${escapeHtml(r.work_phone)}</td>
+        <td>${escapeHtml(r.contact_email)}</td>
+        <td>${escapeHtml(r.notes)}</td>
+      </tr>
+    `).join("");
+
+    svcCountShown.textContent = String(rows.length);
+  }
+
+  function applyServiceFilter() {
+    const q = normalize(svcSearchBox.value).toLowerCase();
+    serviceVisible = !q ? [...serviceAll] : serviceAll.filter(r => serviceSearchString(r).includes(q));
+    renderService(serviceVisible);
+  }
+
+  async function refreshService() {
+    if (!isUnlocked()) return;
+    const url = `${API_BASE}/api/service/customers?fromId=${START_SERVICE_ID}&limit=800&sort=desc`;
+    const data = await fetchJson(url, { method: "GET" });
+    serviceAll = [...(data || [])].sort((a, b) => Number(b.service_id) - Number(a.service_id));
+    applyServiceFilter();
+  }
+
+  async function submitService(e) {
+    e.preventDefault();
+    if (!isUnlocked()) return;
+
+    serviceSubmitBtn.disabled = true;
+    serviceSubmitBtn.textContent = "Submitting…";
+
+    try {
+      const fd = new FormData(serviceForm);
+      const payload = Object.fromEntries(fd.entries());
+
+      payload.first_name = normalize(payload.first_name);
+      payload.last_name = normalize(payload.last_name);
+
+      if (!payload.first_name) throw new Error("First Name is required.");
+      if (!payload.last_name) throw new Error("Last Name is required.");
+
+      const created = await fetchJson(`${API_BASE}/api/service/customers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      serviceForm.reset();
+      await refreshService();
+      alert(`Created Service ID: ${created.service_id}`);
+    } catch (err) {
+      alert(`Submit failed: ${err.message}`);
+    } finally {
+      serviceSubmitBtn.disabled = false;
+      serviceSubmitBtn.textContent = "Submit Service Customer";
+    }
+  }
+
+  function downloadServiceCSV() {
+    window.open(`${API_BASE}/api/service/export.csv?fromId=${START_SERVICE_ID}&sort=asc`, "_blank", "noopener,noreferrer");
+  }
+
+  serviceForm.addEventListener("submit", submitService);
+  svcSearchBox.addEventListener("input", applyServiceFilter);
+  svcRefreshBtn.addEventListener("click", refreshService);
+  svcDownloadCsvBtn.addEventListener("click", downloadServiceCSV);
+
+  // ===== INIT =====
   if (isUnlocked()) {
     if (gateOverlay) gateOverlay.style.display = "none";
-    refresh();
+    setStatusesConnected();
+    refreshProspects();
+    refreshService();
   } else {
     lockUI();
   }
