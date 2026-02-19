@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ID Logs</title>
+  <title>NAG ID Logs</title>
 
   <style>
     :root{
@@ -37,7 +37,6 @@
       max-width: 1200px;
       margin: 0 auto;
     }
-
     header h1{
       margin: 0 0 6px;
       font-size: 22px;
@@ -50,27 +49,6 @@
       line-height: 1.4;
     }
 
-    .tabs{
-      margin-top: 12px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .tabBtn{
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      color: var(--text);
-      padding: 9px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 700;
-      letter-spacing: .2px;
-    }
-    .tabBtn.active{
-      background: rgba(102,194,255,.20);
-      border-color: rgba(102,194,255,.35);
-    }
-
     .wrap{
       max-width: 1200px;
       margin: 0 auto;
@@ -79,7 +57,6 @@
       grid-template-columns: 420px 1fr;
       gap: 14px;
     }
-
     @media (max-width: 980px){
       .wrap{ grid-template-columns: 1fr; }
     }
@@ -121,9 +98,7 @@
       background: rgba(0,0,0,.18);
     }
 
-    .card .bd{
-      padding: var(--pad);
-    }
+    .card .bd{ padding: var(--pad); }
 
     label{
       display:block;
@@ -141,7 +116,6 @@
       color: var(--text);
       outline: none;
     }
-
     input::placeholder{ color: rgba(159,176,208,.65); }
 
     .grid{
@@ -149,7 +123,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-
     .grid-1{ grid-template-columns: 1fr; }
     .grid-3{ grid-template-columns: 1fr 1fr 1fr; }
 
@@ -170,19 +143,38 @@
       font-weight: 650;
       letter-spacing: .2px;
     }
-    button.secondary{
-      background: rgba(255,255,255,.05);
-    }
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
+    button.secondary{ background: rgba(255,255,255,.05); }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
 
     .hint{
       margin-top: 10px;
       font-size: 12px;
       color: var(--muted);
       line-height: 1.4;
+    }
+    .small{ font-size: 11px; color: rgba(159,176,208,.75); }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:10px;
+      margin: 10px auto 0;
+      max-width: 1200px;
+      padding: 0 18px;
+    }
+    .tabBtn{
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight:700;
+      font-size: 13px;
+    }
+    .tabBtn.active{
+      background: rgba(102,194,255,.20);
+      border-color: rgba(102,194,255,.35);
     }
 
     /* LOG TABLE */
@@ -240,9 +232,7 @@
       white-space: nowrap;
     }
 
-    tbody tr:hover td{
-      background: rgba(102,194,255,.06);
-    }
+    tbody tr:hover td{ background: rgba(102,194,255,.06); }
 
     .statusBar{
       padding: 10px var(--pad);
@@ -258,9 +248,7 @@
 
     .badge-ok{ color: var(--ok); }
     .badge-warn{ color: #ffd166; }
-    .small{ font-size: 11px; color: rgba(159,176,208,.75); }
-
-    .hidden{ display:none !important; }
+    .badge-bad{ color: var(--danger); }
 
     /* SIMPLE PASSWORD GATE */
     #gateOverlay{
@@ -286,9 +274,7 @@
       border-bottom:1px solid var(--line);
       font-weight:800;
     }
-    #gateCard .gateBd{
-      padding: var(--pad);
-    }
+    #gateCard .gateBd{ padding: var(--pad); }
     #gateCard .gateBd p{
       margin: 0 0 12px;
       color: var(--muted);
@@ -310,7 +296,7 @@
     <div id="gateCard" role="dialog" aria-modal="true" aria-label="Password Gate">
       <div class="gateHd">Protected Page</div>
       <div class="gateBd">
-        <p>Enter the password to view and use the ID Logs.</p>
+        <p>Enter the password to view and use the logs.</p>
         <label for="gatePassword">Password</label>
         <input id="gatePassword" type="password" placeholder="Enter password" autocomplete="current-password" />
         <div class="actions" style="margin-top:12px;">
@@ -323,24 +309,25 @@
   </div>
 
   <header>
-    <h1>ID Logs</h1>
-    <p>Select a tab. The log is <strong>read-only</strong> and shows every entry saved to the cloud.</p>
-
-    <div class="tabs">
-      <button id="tabProspects" class="tabBtn active" type="button">Prospects</button>
-      <button id="tabService" class="tabBtn" type="button">Service Customers</button>
-    </div>
+    <h1>NAG ID Logs</h1>
+    <p>Use the tabs below to switch between <strong>Prospect ID Log</strong> and <strong>Service Customer IDs</strong>. Logs are <strong>read-only</strong>.</p>
   </header>
 
-  <!-- PROSPECTS -->
-  <main id="viewProspects" class="wrap">
+  <div class="tabs">
+    <button class="tabBtn active" id="tabProspects" type="button">Prospects</button>
+    <button class="tabBtn" id="tabService" type="button">Service Customers</button>
+  </div>
+
+  <main class="wrap">
     <!-- LEFT: ENTRY FORM -->
     <section class="card">
       <div class="hd">
-        <div class="title">New Lead Entry <span class="pill">Creates next 5-digit Prospect ID</span></div>
+        <div class="title" id="formTitle">New Prospect Lead Entry <span class="pill" id="formPill">Creates next 5-digit Prospect ID</span></div>
       </div>
 
       <div class="bd">
+
+        <!-- PROSPECT FORM -->
         <form id="leadForm" autocomplete="off">
           <div class="grid">
             <div>
@@ -425,14 +412,105 @@
           </div>
 
           <div class="actions">
-            <button type="submit" id="submitBtn">Submit Lead</button>
+            <button type="submit" id="submitBtn">Submit Prospect</button>
             <button type="reset" class="secondary">Clear</button>
           </div>
 
           <div class="hint">
             <div class="small">
-              • Prospect ID starts at <strong>22807</strong>.<br/>
+              • Prospect IDs start at <strong>22807</strong>.<br/>
               • Reserved range is skipped: <strong>50000–69999</strong> → jumps to <strong>70001</strong>.<br/>
+              • “Entered Date” auto-fills if left blank.
+            </div>
+          </div>
+        </form>
+
+        <!-- SERVICE FORM -->
+        <form id="serviceForm" autocomplete="off" style="display:none;">
+          <div class="grid">
+            <div>
+              <label for="svc_entered_by">Entered By</label>
+              <input id="svc_entered_by" name="entered_by" placeholder="Your name / initials" required />
+            </div>
+
+            <div>
+              <label for="svc_entered_date">Entered Date (optional)</label>
+              <input id="svc_entered_date" name="entered_date" placeholder="Leave blank to auto-fill today (YYYY-MM-DD)" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="svc_first_name">First Name (required)</label>
+              <input id="svc_first_name" name="first_name" required />
+            </div>
+
+            <div>
+              <label for="svc_last_name">Last Name (required)</label>
+              <input id="svc_last_name" name="last_name" required />
+            </div>
+          </div>
+
+          <div class="grid-1 grid">
+            <div>
+              <label for="svc_street_address">Street Address</label>
+              <input id="svc_street_address" name="street_address" placeholder="123 Main St" />
+            </div>
+          </div>
+
+          <div class="grid-3 grid">
+            <div>
+              <label for="svc_city">City</label>
+              <input id="svc_city" name="city" />
+            </div>
+            <div>
+              <label for="svc_state">ST</label>
+              <input id="svc_state" name="state" placeholder="VA" />
+            </div>
+            <div>
+              <label for="svc_zip">Zip</label>
+              <input id="svc_zip" name="zip" placeholder="22030" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="svc_primary_phone">Primary Phone</label>
+              <input id="svc_primary_phone" name="primary_phone" placeholder="(###) ###-####" />
+            </div>
+            <div>
+              <label for="svc_cell_phone">Cell Phone</label>
+              <input id="svc_cell_phone" name="cell_phone" placeholder="(###) ###-####" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div>
+              <label for="svc_work_phone">Work Phone</label>
+              <input id="svc_work_phone" name="work_phone" placeholder="(###) ###-####" />
+            </div>
+            <div>
+              <label for="svc_contact_email">Contact Email</label>
+              <input id="svc_contact_email" name="contact_email" placeholder="name@email.com" />
+            </div>
+          </div>
+
+          <div class="grid-1 grid">
+            <div>
+              <label for="svc_notes">Notes (optional)</label>
+              <input id="svc_notes" name="notes" placeholder="Anything useful (optional)" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="svcSubmitBtn">Submit Service Customer</button>
+            <button type="reset" class="secondary">Clear</button>
+          </div>
+
+          <div class="hint">
+            <div class="small">
+              • Service IDs allocate in this order:<br/>
+              <strong>66307–69999</strong>, then <strong>60000–66099</strong>, then <strong>500000+</strong>.<br/>
               • “Entered Date” auto-fills if left blank.
             </div>
           </div>
@@ -443,16 +521,18 @@
     <!-- RIGHT: READ-ONLY LOG -->
     <section class="card logShell">
       <div class="hd">
-        <div class="title">Prospect ID Log <span class="pill">Read-only</span></div>
+        <div class="title" id="logTitle">Prospect ID Log <span class="pill">Read-only</span></div>
         <div class="logTools">
           <input id="searchBox" placeholder="Search ID / name / builder / phone…" />
           <button id="refreshBtn" class="secondary" type="button">Refresh</button>
           <button id="downloadCsvBtn" class="secondary" type="button">Download CSV</button>
+          <button id="downloadXlsxBtn" class="secondary" type="button">Download Excel</button>
         </div>
       </div>
 
-      <div class="tableWrap" aria-label="Read-only Prospect ID table">
-        <table id="logTable">
+      <div class="tableWrap" aria-label="Read-only table">
+        <!-- PROSPECT TABLE -->
+        <table id="prospectTable">
           <thead>
             <tr>
               <th>Prospect ID</th>
@@ -472,124 +552,22 @@
               <th>Notes</th>
             </tr>
           </thead>
-          <tbody id="logBody"></tbody>
+          <tbody id="prospectBody">
+            <tr>
+              <td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">
+                No data loaded yet. Unlock the page to use it.
+              </td>
+            </tr>
+          </tbody>
         </table>
-      </div>
 
-      <div class="statusBar">
-        <div id="statusLeft">
-          Status: <span class="badge-warn">Locked</span>
-          <span class="small">— enter the password to use the page.</span>
-        </div>
-        <div class="small">
-          Showing: <span id="countShown">0</span> rows
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- SERVICE CUSTOMERS -->
-  <main id="viewService" class="wrap hidden">
-    <!-- LEFT: SERVICE ENTRY -->
-    <section class="card">
-      <div class="hd">
-        <div class="title">New Service Customer <span class="pill">Creates Service ID</span></div>
-      </div>
-
-      <div class="bd">
-        <form id="serviceForm" autocomplete="off">
-          <div class="grid">
-            <div>
-              <label for="svc_first_name">First Name (required)</label>
-              <input id="svc_first_name" name="first_name" required />
-            </div>
-            <div>
-              <label for="svc_last_name">Last Name (required)</label>
-              <input id="svc_last_name" name="last_name" required />
-            </div>
-          </div>
-
-          <div class="grid-1 grid">
-            <div>
-              <label for="svc_street_address">Street Address</label>
-              <input id="svc_street_address" name="street_address" />
-            </div>
-          </div>
-
-          <div class="grid-3 grid">
-            <div>
-              <label for="svc_city">City</label>
-              <input id="svc_city" name="city" />
-            </div>
-            <div>
-              <label for="svc_state">ST</label>
-              <input id="svc_state" name="state" placeholder="VA" />
-            </div>
-            <div>
-              <label for="svc_zip">Zip</label>
-              <input id="svc_zip" name="zip" />
-            </div>
-          </div>
-
-          <div class="grid">
-            <div>
-              <label for="svc_primary_phone">Primary Phone</label>
-              <input id="svc_primary_phone" name="primary_phone" />
-            </div>
-            <div>
-              <label for="svc_cell_phone">Cell Phone</label>
-              <input id="svc_cell_phone" name="cell_phone" />
-            </div>
-          </div>
-
-          <div class="grid">
-            <div>
-              <label for="svc_work_phone">Work Phone</label>
-              <input id="svc_work_phone" name="work_phone" />
-            </div>
-            <div>
-              <label for="svc_contact_email">Contact Email</label>
-              <input id="svc_contact_email" name="contact_email" />
-            </div>
-          </div>
-
-          <div class="grid-1 grid">
-            <div>
-              <label for="svc_notes">Notes</label>
-              <input id="svc_notes" name="notes" />
-            </div>
-          </div>
-
-          <div class="actions">
-            <button type="submit" id="serviceSubmitBtn">Submit Service Customer</button>
-            <button type="reset" class="secondary">Clear</button>
-          </div>
-
-          <div class="hint">
-            <div class="small">
-              • Service IDs: <strong>66307–69999</strong>, then <strong>60000–66099</strong>, then <strong>500000+</strong>.
-            </div>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- RIGHT: SERVICE LOG -->
-    <section class="card logShell">
-      <div class="hd">
-        <div class="title">Service Customer ID Log <span class="pill">Read-only</span></div>
-        <div class="logTools">
-          <input id="svcSearchBox" placeholder="Search ID / name / phone / email…" />
-          <button id="svcRefreshBtn" class="secondary" type="button">Refresh</button>
-          <button id="svcDownloadCsvBtn" class="secondary" type="button">Download CSV</button>
-        </div>
-      </div>
-
-      <div class="tableWrap" aria-label="Read-only Service Customer table">
-        <table id="svcTable">
+        <!-- SERVICE TABLE -->
+        <table id="serviceTable" style="display:none;">
           <thead>
             <tr>
               <th>Service ID</th>
+              <th>Entered By</th>
+              <th>Entered Date</th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Street Address</th>
@@ -603,17 +581,23 @@
               <th>Notes</th>
             </tr>
           </thead>
-          <tbody id="svcBody"></tbody>
+          <tbody id="serviceBody">
+            <tr>
+              <td colspan="14" style="padding:14px; color: rgba(159,176,208,.85);">
+                No data loaded yet. Unlock the page to use it.
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
 
       <div class="statusBar">
-        <div id="svcStatusLeft">
+        <div id="statusLeft">
           Status: <span class="badge-warn">Locked</span>
           <span class="small">— enter the password to use the page.</span>
         </div>
-        <div class="small">
-          Showing: <span id="svcCountShown">0</span> rows
+        <div id="statusRight" class="small">
+          Showing: <span id="countShown">0</span> rows
         </div>
       </div>
     </section>
