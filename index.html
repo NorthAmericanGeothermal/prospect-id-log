@@ -1,608 +1,590 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NAG ID Logs</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzFhM2E2YiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIxMyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5OQTwvdGV4dD4KICA8dGV4dCB4PSIxNiIgeT0iMjMiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjYzAzOTJiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HRU88L3RleHQ+CiAgPGxpbmUgeDE9IjQiIHkxPSIyNiIgeDI9IjI4IiB5Mj0iMjYiIHN0cm9rZT0iI2MwMzkyYiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPC9zdmc+">
+<title>NAGeo Prospect ID System</title>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;}
 
-  <style>
-    :root{
-      --bg:#0b1220;
-      --panel:#121c2e;
-      --panel2:#0f1727;
-      --text:#e7eefc;
-      --muted:#9fb0d0;
-      --line:rgba(255,255,255,.10);
-      --accent:#66c2ff;
-      --danger:#ff6b6b;
-      --ok:#77e0a3;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius:14px;
-      --pad:16px;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
+/* ── TOKENS ── */
+:root{
+  --navy:       #0f2341;
+  --navy-mid:   #1a3561;
+  --navy-light: #1e4080;
+  --accent:     #2e73d4;
+  --accent-hover:#1d5cb8;
+  --accent-light:#dbeafe;
+  --red:        #c0392b;
+  --bg:         #f0f2f5;
+  --surface:    #ffffff;
+  --border:     #e2e5ea;
+  --border-dark:#c8cdd6;
+  --text:       #0f1923;
+  --text-mid:   #4a5568;
+  --text-muted: #8a95a3;
+  --green:      #16a34a;
+  --green-bg:   #dcfce7;
+  --yellow:     #ca8a04;
+  --yellow-bg:  #fef9c3;
+  --red-bg:     #fee2e2;
+  --radius-sm:  6px;
+  --radius:     10px;
+  --radius-lg:  14px;
+  --shadow-sm:  0 1px 3px rgba(15,35,65,.07);
+  --shadow:     0 2px 8px rgba(15,35,65,.10);
+}
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family:var(--font);
-      color:var(--text);
-      background: radial-gradient(1200px 800px at 20% 0%, rgba(102,194,255,.18), transparent 60%),
-                  radial-gradient(1200px 800px at 90% 20%, rgba(119,224,163,.14), transparent 60%),
-                  var(--bg);
-    }
+/* ── BASE ── */
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:14px;
+}
 
-    header{
-      padding: 22px 18px 10px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    header h1{
-      margin: 0 0 6px;
-      font-size: 22px;
-      letter-spacing: .2px;
-    }
-    header p{
-      margin:0;
-      color:var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-    }
+/* ── GATE OVERLAY ── */
+#gateOverlay{
+  position:fixed;inset:0;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;
+}
+.gate-card{
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  padding:2.25rem 2rem;
+  width:340px;
+  text-align:center;
+  box-shadow:var(--shadow);
+}
+.gate-logo{
+  font-size:20px;font-weight:700;color:var(--navy);
+  margin-bottom:3px;letter-spacing:-0.3px;
+}
+.gate-logo span{color:var(--accent);}
+.gate-sub{
+  font-size:12px;color:var(--text-muted);
+  margin-bottom:1.75rem;
+  text-transform:uppercase;letter-spacing:0.6px;
+}
+.gate-label{
+  font-size:11px;font-weight:600;color:var(--text-mid);
+  text-align:left;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;
+}
+#gatePassword{
+  width:100%;padding:10px 14px;
+  border:1px solid var(--border-dark);border-radius:var(--radius);
+  font-size:15px;text-align:center;letter-spacing:4px;
+  background:var(--bg);color:var(--text);
+  margin-bottom:10px;font-family:inherit;
+}
+#gatePassword:focus{outline:none;border-color:var(--accent);background:#fff;}
+#gateBtn{
+  width:100%;padding:11px;
+  background:var(--navy);color:#fff;
+  border:none;border-radius:var(--radius);
+  font-size:14px;font-weight:600;cursor:pointer;
+  letter-spacing:0.3px;transition:background .15s;
+}
+#gateBtn:hover{background:var(--navy-light);}
+#gateError{
+  font-size:12px;color:var(--red);
+  margin-top:8px;display:none;
+}
 
-    .wrap{
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 14px 18px 28px;
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 980px){
-      .wrap{ grid-template-columns: 1fr; }
-    }
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--navy);
+  padding:0 1.5rem;
+  height:54px;
+  display:flex;align-items:center;gap:1rem;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+}
+.topbar-logo{
+  font-size:15px;font-weight:700;color:#fff;
+  flex:1;letter-spacing:-0.2px;
+}
+.topbar-logo span{color:#6aadff;}
+.topbar-divider{width:1px;height:20px;background:rgba(255,255,255,.15);}
 
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+/* ── TABS ── */
+.tabs{
+  display:flex;gap:4px;
+  background:rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  padding:3px;
+}
+.tab{
+  padding:5px 14px;font-size:13px;font-weight:500;
+  border-radius:7px;border:none;
+  background:transparent;color:rgba(255,255,255,.6);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.tab.active{background:#fff;color:var(--navy);font-weight:600;}
+.tab:not(.active):hover{background:rgba(255,255,255,.12);color:#fff;}
 
-    .card .hd{
-      padding: 14px var(--pad);
-      background: rgba(255,255,255,.02);
-      border-bottom: 1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
+/* status bar */
+.topbar-status{font-size:12px;color:rgba(255,255,255,.55);}
+.badge-ok{color:#6ee7b7;font-weight:600;}
+.badge-bad{color:#fca5a5;font-weight:600;}
+.badge-warn{color:#fde68a;font-weight:600;}
 
-    .card .hd .title{
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing:.3px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      white-space:nowrap;
-    }
+/* ── MAIN LAYOUT ── */
+.main{
+  max-width:1300px;margin:0 auto;
+  padding:1.5rem 1.5rem;
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:1.25rem;
+  align-items:start;
+}
+@media(max-width:860px){
+  .main{grid-template-columns:1fr;}
+}
 
-    .pill{
-      font-size: 12px;
-      color: var(--muted);
-      border:1px solid var(--line);
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.18);
-    }
+/* ── FORM PANEL ── */
+.form-panel{
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+  position:sticky;top:70px;
+}
+.form-panel-header{
+  background:var(--navy);
+  padding:14px 16px;
+  display:flex;align-items:center;gap:8px;
+}
+#formTitle{
+  font-size:13px;font-weight:600;color:#fff;
+  flex:1;
+}
+.pill{
+  font-size:10px;padding:2px 8px;border-radius:4px;
+  background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);
+  white-space:nowrap;
+}
+.form-body{padding:1rem;}
 
-    .card .bd{ padding: var(--pad); }
+/* form elements */
+.fg{margin-bottom:10px;}
+.fg label{
+  display:block;font-size:11px;font-weight:600;
+  color:var(--text-mid);margin-bottom:4px;
+  text-transform:uppercase;letter-spacing:0.5px;
+}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:8px 10px;
+  border:1px solid var(--border-dark);border-radius:var(--radius-sm);
+  font-size:13px;font-family:inherit;
+  background:var(--bg);color:var(--text);
+  transition:border-color .15s,background .15s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{
+  outline:none;border-color:var(--accent);background:#fff;
+}
+.fg textarea{resize:vertical;min-height:60px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.form-divider{
+  font-size:10px;font-weight:700;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.8px;
+  margin:12px 0 8px;padding-bottom:5px;
+  border-bottom:1px solid var(--border);
+}
 
-    label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
+/* submit button */
+.submit-btn{
+  width:100%;padding:10px;margin-top:4px;
+  background:var(--navy);color:#fff;
+  border:none;border-radius:var(--radius);
+  font-size:13px;font-weight:600;cursor:pointer;
+  letter-spacing:0.3px;transition:background .15s;
+}
+.submit-btn:hover{background:var(--navy-light);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
 
-    input{
-      width:100%;
-      padding: 10px 11px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      outline: none;
-    }
-    input::placeholder{ color: rgba(159,176,208,.65); }
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;gap:1rem;}
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .grid-1{ grid-template-columns: 1fr; }
-    .grid-3{ grid-template-columns: 1fr 1fr 1fr; }
+/* ── LOG CARD ── */
+.log-card{
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+}
+.log-card-header{
+  padding:12px 16px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
+#logTitle{
+  font-size:13px;font-weight:600;color:var(--text);flex:1;
+}
+#logTitle .pill{
+  background:var(--accent-light);color:var(--accent);
+  font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;
+}
 
-    .actions{
-      display:flex;
-      gap:10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
+/* search + toolbar */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+#searchBox{
+  flex:1;min-width:160px;
+  padding:7px 12px;
+  border:1px solid var(--border-dark);border-radius:var(--radius);
+  font-size:13px;font-family:inherit;
+  background:#fff;color:var(--text);
+}
+#searchBox:focus{outline:none;border-color:var(--accent);}
+.icon-btn{
+  padding:7px 12px;
+  border:1px solid var(--border-dark);border-radius:var(--radius);
+  background:#fff;color:var(--text-mid);
+  font-size:12px;cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.icon-btn:hover{background:var(--bg);border-color:var(--accent);color:var(--accent);}
+.dl-btn{
+  padding:7px 12px;
+  border:none;border-radius:var(--radius);
+  font-size:12px;font-weight:600;cursor:pointer;
+  transition:background .15s;white-space:nowrap;
+}
+#downloadCsvBtn{background:var(--green-bg);color:var(--green);}
+#downloadCsvBtn:hover{background:#bbf7d0;}
+#downloadXlsxBtn{background:#ede9fe;color:#6d28d9;}
+#downloadXlsxBtn:hover{background:#ddd6fe;}
 
-    button{
-      border: 1px solid var(--line);
-      background: rgba(102,194,255,.18);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 650;
-      letter-spacing: .2px;
-    }
-    button.secondary{ background: rgba(255,255,255,.05); }
-    button:disabled{ opacity:.55; cursor:not-allowed; }
+/* count bar */
+.count-bar{
+  font-size:11px;color:var(--text-muted);
+  padding:6px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
+#countShown{font-weight:700;color:var(--text);}
 
-    .hint{
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-    .small{ font-size: 11px; color: rgba(159,176,208,.75); }
+/* status footer */
+.status-bar{
+  padding:7px 16px;
+  border-top:1px solid var(--border);
+  background:var(--bg);
+  font-size:11px;color:var(--text-muted);
+}
 
-    /* Tabs */
-    .tabs{
-      display:flex;
-      gap:10px;
-      margin: 10px auto 0;
-      max-width: 1200px;
-      padding: 0 18px;
-    }
-    .tabBtn{
-      background: rgba(255,255,255,.05);
-      border:1px solid var(--line);
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-weight:700;
-      font-size: 13px;
-    }
-    .tabBtn.active{
-      background: rgba(102,194,255,.20);
-      border-color: rgba(102,194,255,.35);
-    }
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;}
+th{
+  padding:9px 12px;text-align:left;
+  background:var(--navy);color:rgba(255,255,255,.75);
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;
+  white-space:nowrap;
+}
+th:first-child{border-radius:0;}
+td{
+  padding:9px 12px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);vertical-align:top;
+  white-space:nowrap;
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f6f8fc;}
+td:first-child{
+  font-weight:700;color:var(--accent);
+  font-family:'SF Mono',monospace;font-size:11px;
+}
 
-    /* LOG TABLE */
-    .logShell{
-      height: calc(100vh - 190px);
-      min-height: 520px;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .logTools{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .logTools input{
-      width: 240px;
-      max-width: 100%;
-      padding: 9px 11px;
-    }
-
-    .tableWrap{
-      flex:1;
-      overflow:auto;
-      background: rgba(0,0,0,.12);
-    }
-
-    table{
-      width:100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      min-width: 1120px;
-    }
-
-    thead th{
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: rgba(18,28,46,.96);
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid var(--line);
-      font-size: 12px;
-      color: var(--muted);
-      text-align:left;
-      padding: 10px 10px;
-      white-space: nowrap;
-    }
-
-    tbody td{
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      padding: 10px 10px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    tbody tr:hover td{ background: rgba(102,194,255,.06); }
-
-    .statusBar{
-      padding: 10px var(--pad);
-      border-top: 1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      color: var(--muted);
-      font-size: 12px;
-      background: rgba(255,255,255,.02);
-    }
-
-    .badge-ok{ color: var(--ok); }
-    .badge-warn{ color: #ffd166; }
-    .badge-bad{ color: var(--danger); }
-
-    /* SIMPLE PASSWORD GATE */
-    #gateOverlay{
-      position:fixed;
-      inset:0;
-      background: rgba(0,0,0,.72);
-      backdrop-filter: blur(8px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-    }
-    #gateCard{
-      width:min(520px, 92vw);
-      background: rgba(18,28,46,.98);
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    #gateCard .gateHd{
-      padding: 14px var(--pad);
-      border-bottom:1px solid var(--line);
-      font-weight:800;
-    }
-    #gateCard .gateBd{ padding: var(--pad); }
-    #gateCard .gateBd p{
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height:1.4;
-    }
-    #gateError{
-      margin-top:10px;
-      color: var(--danger);
-      font-size: 12px;
-      display:none;
-    }
-  </style>
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .topbar{padding:0 .75rem;height:auto;flex-wrap:wrap;padding:8px 12px;gap:6px;}
+  .topbar-logo{font-size:14px;width:100%;}
+  .tabs{width:100%;}
+  .tab{flex:1;text-align:center;font-size:12px;padding:5px 8px;}
+  .main{padding:1rem .75rem;}
+  .form-row{grid-template-columns:1fr;}
+  .toolbar{flex-direction:column;align-items:stretch;}
+  #searchBox{min-width:unset;}
+}
+</style>
 </head>
-
 <body>
-  <!-- Simple password gate (client-side) -->
-  <div id="gateOverlay" aria-hidden="false">
-    <div id="gateCard" role="dialog" aria-modal="true" aria-label="Password Gate">
-      <div class="gateHd">Protected Page</div>
-      <div class="gateBd">
-        <p>Enter the password to view and use the logs.</p>
-        <label for="gatePassword">Password</label>
-        <input id="gatePassword" type="password" placeholder="Enter password" autocomplete="current-password" />
-        <div class="actions" style="margin-top:12px;">
-          <button id="gateBtn" type="button">Unlock</button>
-        </div>
-        <div id="gateError">Incorrect password.</div>
-        <div class="small" style="margin-top:10px;">Tip: this stays unlocked until you close the tab.</div>
-      </div>
-    </div>
+
+<!-- ── GATE ── -->
+<div id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-logo">NAGeo <span>Prospects</span></div>
+    <div class="gate-sub">North American Geothermal &mdash; ID System</div>
+    <div class="gate-label">Password</div>
+    <input type="password" id="gatePassword" placeholder="Enter password" autocomplete="current-password">
+    <button id="gateBtn">Unlock</button>
+    <div id="gateError">Incorrect password. Try again.</div>
   </div>
+</div>
 
-  <header>
-    <h1>NAG ID Logs</h1>
-    <p>Use the tabs below to switch between <strong>Prospect ID Log</strong> and <strong>Service Customer IDs</strong>. Logs are <strong>read-only</strong>.</p>
-  </header>
-
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-logo">NAGeo <span>Prospects</span></div>
   <div class="tabs">
-    <button class="tabBtn active" id="tabProspects" type="button">Prospects</button>
-    <button class="tabBtn" id="tabService" type="button">Service Customers</button>
+    <button class="tab active" id="tabProspects">Prospects</button>
+    <button class="tab" id="tabService">Service</button>
   </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-status" id="statusTopbar">Status: <span class="badge-warn">Locked</span></div>
+</div>
 
-  <main class="wrap">
-    <!-- LEFT: ENTRY FORM -->
-    <section class="card">
-      <div class="hd">
-        <div class="title" id="formTitle">New Prospect Lead Entry <span class="pill" id="formPill">Creates next 5-digit Prospect ID</span></div>
-      </div>
+<!-- ── MAIN ── -->
+<div class="main">
 
-      <div class="bd">
+  <!-- LEFT: FORM PANEL -->
+  <div class="form-panel">
+    <div class="form-panel-header">
+      <div id="formTitle">New Prospect Lead Entry <span id="formPill" class="pill">Creates next 5-digit Prospect ID</span></div>
+    </div>
 
-        <!-- PROSPECT FORM -->
-        <form id="leadForm" autocomplete="off">
-          <div class="grid">
-            <div>
-              <label for="entered_by">Entered By</label>
-              <input id="entered_by" name="entered_by" placeholder="Your name / initials" required />
-            </div>
+    <div class="form-body">
 
-            <div>
-              <label for="entered_date">Entered Date (optional)</label>
-              <input id="entered_date" name="entered_date" placeholder="Leave blank to auto-fill today (YYYY-MM-DD)" />
-            </div>
+      <!-- PROSPECT FORM -->
+      <form id="leadForm">
+        <div class="fg">
+          <label>Entered by</label>
+          <input type="text" name="entered_by" placeholder="Your name" required>
+        </div>
+        <div class="fg">
+          <label>Date</label>
+          <input type="date" name="entered_date">
+        </div>
+        <div class="fg">
+          <label>Source</label>
+          <select name="source" required>
+            <option value="">Select source…</option>
+            <option>Website</option>
+            <option>Referral</option>
+            <option>Builder</option>
+            <option>Phone</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-divider">Builder info</div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Builder name</label>
+            <input type="text" name="builder_name" placeholder="Optional">
           </div>
-
-          <div class="grid">
-            <div>
-              <label for="source">Source</label>
-              <input id="source" name="source" placeholder="Builder / Referral / Web / etc." required />
-            </div>
-
-            <div>
-              <label for="primary_phone">Primary Phone</label>
-              <input id="primary_phone" name="primary_phone" placeholder="(###) ###-####" />
-            </div>
+          <div class="fg">
+            <label>Builder phone</label>
+            <input type="tel" name="builder_phone" placeholder="Optional">
           </div>
+        </div>
 
-          <div class="grid">
-            <div>
-              <label for="builder_name">Builder Name</label>
-              <input id="builder_name" name="builder_name" placeholder="Builder / Company name" />
-            </div>
-
-            <div>
-              <label for="builder_phone">Builder Phone</label>
-              <input id="builder_phone" name="builder_phone" placeholder="(###) ###-####" />
-            </div>
+        <div class="form-divider">Customer info</div>
+        <div class="form-row">
+          <div class="fg">
+            <label>First name</label>
+            <input type="text" name="first_name" placeholder="First">
           </div>
-
-          <div class="grid">
-            <div>
-              <label for="first_name">First Name</label>
-              <input id="first_name" name="first_name" />
-            </div>
-
-            <div>
-              <label for="last_name">Last Name</label>
-              <input id="last_name" name="last_name" />
-            </div>
+          <div class="fg">
+            <label>Last name</label>
+            <input type="text" name="last_name" placeholder="Last">
           </div>
-
-          <div class="grid-1 grid">
-            <div>
-              <label for="street_address">Street Address</label>
-              <input id="street_address" name="street_address" placeholder="123 Main St" />
-            </div>
+        </div>
+        <div class="fg">
+          <label>Street address</label>
+          <input type="text" name="street_address" placeholder="123 Main St">
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>City</label>
+            <input type="text" name="city">
           </div>
-
-          <div class="grid-3 grid">
-            <div>
-              <label for="city">City</label>
-              <input id="city" name="city" />
-            </div>
-            <div>
-              <label for="state">State</label>
-              <input id="state" name="state" placeholder="VA" />
-            </div>
-            <div>
-              <label for="zip">Zip</label>
-              <input id="zip" name="zip" placeholder="22030" />
-            </div>
+          <div class="fg">
+            <label>State</label>
+            <input type="text" name="state" placeholder="VA">
           </div>
+        </div>
+        <div class="fg">
+          <label>ZIP</label>
+          <input type="text" name="zip" placeholder="22030">
+        </div>
+        <div class="fg">
+          <label>Phone</label>
+          <input type="tel" name="primary_phone">
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" name="contact_email">
+        </div>
+        <div class="fg">
+          <label>Notes</label>
+          <textarea name="notes" placeholder="Any additional notes…"></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Prospect</button>
+      </form>
 
-          <div class="grid">
-            <div>
-              <label for="contact_email">Contact Email</label>
-              <input id="contact_email" name="contact_email" placeholder="name@email.com" />
-            </div>
+      <!-- SERVICE FORM -->
+      <form id="serviceForm" style="display:none">
+        <div class="fg">
+          <label>Entered by</label>
+          <input type="text" name="entered_by" placeholder="Your name" required>
+        </div>
+        <div class="fg">
+          <label>Date</label>
+          <input type="date" name="entered_date">
+        </div>
 
-            <div>
-              <label for="notes">Notes (optional)</label>
-              <input id="notes" name="notes" placeholder="Anything useful (optional)" />
-            </div>
+        <div class="form-divider">Customer info</div>
+        <div class="form-row">
+          <div class="fg">
+            <label>First name</label>
+            <input type="text" name="first_name" placeholder="First" required>
           </div>
-
-          <div class="actions">
-            <button type="submit" id="submitBtn">Submit Prospect</button>
-            <button type="reset" class="secondary">Clear</button>
+          <div class="fg">
+            <label>Last name</label>
+            <input type="text" name="last_name" placeholder="Last" required>
           </div>
-
-          <div class="hint">
-            <div class="small">
-              • Prospect IDs start at <strong>22807</strong>.<br/>
-              • Reserved range is skipped: <strong>50000–69999</strong> → jumps to <strong>70001</strong>.<br/>
-              • “Entered Date” auto-fills if left blank.
-            </div>
+        </div>
+        <div class="fg">
+          <label>Street address</label>
+          <input type="text" name="street_address" placeholder="123 Main St">
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>City</label>
+            <input type="text" name="city">
           </div>
-        </form>
-
-        <!-- SERVICE FORM -->
-        <form id="serviceForm" autocomplete="off" style="display:none;">
-          <div class="grid">
-            <div>
-              <label for="svc_entered_by">Entered By</label>
-              <input id="svc_entered_by" name="entered_by" placeholder="Your name / initials" required />
-            </div>
-
-            <div>
-              <label for="svc_entered_date">Entered Date (optional)</label>
-              <input id="svc_entered_date" name="entered_date" placeholder="Leave blank to auto-fill today (YYYY-MM-DD)" />
-            </div>
+          <div class="fg">
+            <label>State</label>
+            <input type="text" name="state" placeholder="VA">
           </div>
+        </div>
+        <div class="fg">
+          <label>ZIP</label>
+          <input type="text" name="zip" placeholder="22030">
+        </div>
 
-          <div class="grid">
-            <div>
-              <label for="svc_first_name">First Name (required)</label>
-              <input id="svc_first_name" name="first_name" required />
-            </div>
+        <div class="form-divider">Contact</div>
+        <div class="fg">
+          <label>Primary phone</label>
+          <input type="tel" name="primary_phone">
+        </div>
+        <div class="fg">
+          <label>Cell phone</label>
+          <input type="tel" name="cell_phone">
+        </div>
+        <div class="fg">
+          <label>Work phone</label>
+          <input type="tel" name="work_phone">
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" name="contact_email">
+        </div>
+        <div class="fg">
+          <label>Notes</label>
+          <textarea name="notes" placeholder="Any additional notes…"></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="svcSubmitBtn">Submit Service Customer</button>
+      </form>
 
-            <div>
-              <label for="svc_last_name">Last Name (required)</label>
-              <input id="svc_last_name" name="last_name" required />
-            </div>
-          </div>
+    </div><!-- /form-body -->
+  </div><!-- /form-panel -->
 
-          <div class="grid-1 grid">
-            <div>
-              <label for="svc_street_address">Street Address</label>
-              <input id="svc_street_address" name="street_address" placeholder="123 Main St" />
-            </div>
-          </div>
-
-          <div class="grid-3 grid">
-            <div>
-              <label for="svc_city">City</label>
-              <input id="svc_city" name="city" />
-            </div>
-            <div>
-              <label for="svc_state">ST</label>
-              <input id="svc_state" name="state" placeholder="VA" />
-            </div>
-            <div>
-              <label for="svc_zip">Zip</label>
-              <input id="svc_zip" name="zip" placeholder="22030" />
-            </div>
-          </div>
-
-          <div class="grid">
-            <div>
-              <label for="svc_primary_phone">Primary Phone</label>
-              <input id="svc_primary_phone" name="primary_phone" placeholder="(###) ###-####" />
-            </div>
-            <div>
-              <label for="svc_cell_phone">Cell Phone</label>
-              <input id="svc_cell_phone" name="cell_phone" placeholder="(###) ###-####" />
-            </div>
-          </div>
-
-          <div class="grid">
-            <div>
-              <label for="svc_work_phone">Work Phone</label>
-              <input id="svc_work_phone" name="work_phone" placeholder="(###) ###-####" />
-            </div>
-            <div>
-              <label for="svc_contact_email">Contact Email</label>
-              <input id="svc_contact_email" name="contact_email" placeholder="name@email.com" />
-            </div>
-          </div>
-
-          <div class="grid-1 grid">
-            <div>
-              <label for="svc_notes">Notes (optional)</label>
-              <input id="svc_notes" name="notes" placeholder="Anything useful (optional)" />
-            </div>
-          </div>
-
-          <div class="actions">
-            <button type="submit" id="svcSubmitBtn">Submit Service Customer</button>
-            <button type="reset" class="secondary">Clear</button>
-          </div>
-
-          <div class="hint">
-            <div class="small">
-              • Service IDs allocate in this order:<br/>
-              <strong>66307–69999</strong>, then <strong>60000–66099</strong>, then <strong>500000+</strong>.<br/>
-              • “Entered Date” auto-fills if left blank.
-            </div>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- RIGHT: READ-ONLY LOG -->
-    <section class="card logShell">
-      <div class="hd">
-        <div class="title" id="logTitle">Prospect ID Log <span class="pill">Read-only</span></div>
-        <div class="logTools">
-          <input id="searchBox" placeholder="Search ID / name / builder / phone…" />
-          <button id="refreshBtn" class="secondary" type="button">Refresh</button>
-          <button id="downloadCsvBtn" class="secondary" type="button">Download CSV</button>
-          <button id="downloadXlsxBtn" class="secondary" type="button">Download Excel</button>
+  <!-- RIGHT: LOG -->
+  <div class="right-panel">
+    <div class="log-card">
+      <div class="log-card-header">
+        <div id="logTitle">Prospect ID Log <span class="pill">Read-only</span></div>
+        <div class="toolbar">
+          <input type="text" id="searchBox" placeholder="Search ID / name / builder / phone…">
+          <button class="icon-btn" id="refreshBtn">&#8635; Refresh</button>
+          <button class="dl-btn" id="downloadCsvBtn">&#8595; CSV</button>
+          <button class="dl-btn" id="downloadXlsxBtn">&#8595; Excel</button>
         </div>
       </div>
 
-      <div class="tableWrap" aria-label="Read-only table">
-        <!-- PROSPECT TABLE -->
-        <table id="prospectTable">
+      <div class="count-bar">Showing <span id="countShown">0</span> records</div>
+
+      <!-- PROSPECT TABLE -->
+      <div class="table-wrap" id="prospectTable">
+        <table>
           <thead>
             <tr>
               <th>Prospect ID</th>
               <th>Entered By</th>
-              <th>Entered Date</th>
+              <th>Date</th>
               <th>Source</th>
               <th>Builder Name</th>
               <th>Builder Phone</th>
               <th>First Name</th>
               <th>Last Name</th>
-              <th>Street Address</th>
+              <th>Address</th>
               <th>City</th>
               <th>State</th>
-              <th>Zip</th>
-              <th>Primary Phone</th>
-              <th>Contact Email</th>
+              <th>ZIP</th>
+              <th>Phone</th>
+              <th>Email</th>
               <th>Notes</th>
             </tr>
           </thead>
           <tbody id="prospectBody">
-            <tr>
-              <td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">
-                No data loaded yet. Unlock the page to use it.
-              </td>
-            </tr>
+            <tr><td colspan="15" style="padding:20px;color:var(--text-muted);text-align:center;">Unlock to view records.</td></tr>
           </tbody>
         </table>
+      </div>
 
-        <!-- SERVICE TABLE -->
-        <table id="serviceTable" style="display:none;">
+      <!-- SERVICE TABLE -->
+      <div class="table-wrap" id="serviceTable" style="display:none">
+        <table>
           <thead>
             <tr>
               <th>Service ID</th>
               <th>Entered By</th>
-              <th>Entered Date</th>
+              <th>Date</th>
               <th>First Name</th>
               <th>Last Name</th>
-              <th>Street Address</th>
+              <th>Address</th>
               <th>City</th>
-              <th>ST</th>
-              <th>Zip</th>
+              <th>State</th>
+              <th>ZIP</th>
               <th>Primary Phone</th>
               <th>Cell Phone</th>
               <th>Work Phone</th>
-              <th>Contact Email</th>
+              <th>Email</th>
               <th>Notes</th>
             </tr>
           </thead>
           <tbody id="serviceBody">
-            <tr>
-              <td colspan="14" style="padding:14px; color: rgba(159,176,208,.85);">
-                No data loaded yet. Unlock the page to use it.
-              </td>
-            </tr>
+            <tr><td colspan="14" style="padding:20px;color:var(--text-muted);text-align:center;">Unlock to view records.</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="statusBar">
-        <div id="statusLeft">
-          Status: <span class="badge-warn">Locked</span>
-          <span class="small">— enter the password to use the page.</span>
-        </div>
-        <div id="statusRight" class="small">
-          Showing: <span id="countShown">0</span> rows
-        </div>
-      </div>
-    </section>
-  </main>
+      <div class="status-bar" id="statusLeft">Status: <span class="badge-warn">Locked</span></div>
+    </div>
+  </div><!-- /right-panel -->
 
-  <script src="app.js"></script>
+</div><!-- /main -->
+
+<script src="app.js"></script>
+<script>
+// Mirror status updates to topbar badge
+(function(){
+  var bottom = document.getElementById('statusLeft');
+  var top = document.getElementById('statusTopbar');
+  if(!bottom||!top) return;
+  var obs = new MutationObserver(function(){ top.innerHTML = bottom.innerHTML; });
+  obs.observe(bottom, {childList:true,subtree:true,characterData:true});
+})();
+</script>
 </body>
 </html>
