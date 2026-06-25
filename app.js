@@ -2,6 +2,8 @@
   // ===== CONFIG =====
   const WORKER_BASE = "https://prospect-id-cloud.nagprospects.workers.dev";
   const PASSWORD = "Prospects2011!!#";
+  const REMEMBER_KEY = "nageo_prospects_unlocked";
+  const REMEMBER_DAYS = 30;
 
   // ===== ELEMENTS =====
   const gateOverlay = document.getElementById("gateOverlay");
@@ -91,8 +93,6 @@
   }
 
   function csvToXlsx(csvText) {
-    // Minimal Excel-friendly "xlsx" via HTML table served as .xls.
-    // (Works well for your use case; true XLSX requires a bigger library.)
     const lines = csvText.split("\n").map(l => l.split(","));
     const html = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -105,9 +105,29 @@
     return new Blob([html], { type: "application/vnd.ms-excel" });
   }
 
+  // ===== 30-DAY DEVICE MEMORY =====
+  function saveRemember() {
+    const expires = Date.now() + REMEMBER_DAYS * 24 * 60 * 60 * 1000;
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ expires }));
+  }
+
+  function checkRemember() {
+    try {
+      const raw = localStorage.getItem(REMEMBER_KEY);
+      if (!raw) return false;
+      const { expires } = JSON.parse(raw);
+      if (Date.now() < expires) return true;
+      localStorage.removeItem(REMEMBER_KEY); // expired — clear it
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // ===== PASSWORD GATE =====
   function unlock() {
     unlocked = true;
+    saveRemember();
     gateOverlay.style.display = "none";
     setStatus("ok", "Unlocked");
     loadCurrentView();
@@ -320,7 +340,6 @@
     if (!payload.entered_by) return alert("Entered By is required.");
     if (!payload.source) return alert("Source is required.");
 
-    // allow blank entered_date -> server fills
     try {
       submitBtn.disabled = true;
       setStatus("warn", "Submitting…");
@@ -377,7 +396,6 @@
     try {
       setStatus("warn", "Preparing CSV…");
       if (view === "prospects") {
-        // Prefer server-export to match DB exactly
         const res = await apiGet("/api/export.csv?sort=asc");
         const text = await res.text();
         downloadBlob("prospect_id_log.csv", new Blob([text], { type: "text/csv;charset=utf-8" }));
@@ -420,5 +438,10 @@
 
   // ===== INIT =====
   setActiveTab();
-  setStatus("warn", "Locked");
+  // Auto-unlock if this device remembered the password within 30 days
+  if (checkRemember()) {
+    unlock();
+  } else {
+    setStatus("warn", "Locked");
+  }
 })();
