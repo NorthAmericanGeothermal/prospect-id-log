@@ -278,7 +278,7 @@
         <td>${escapeHtml(r.zip)}</td>
         <td>${escapeHtml(r.primary_phone)}</td>
         <td>${escapeHtml(r.contact_email)}</td>
-        <td>${escapeHtml(r.notes)}</td>
+        <td>${notesCell(r.notes)}</td>
       </tr>
     `).join("");
   }
@@ -304,7 +304,7 @@
         <td>${escapeHtml(r.cell_phone)}</td>
         <td>${escapeHtml(r.work_phone)}</td>
         <td>${escapeHtml(r.contact_email)}</td>
-        <td>${escapeHtml(r.notes)}</td>
+        <td>${notesCell(r.notes)}</td>
       </tr>
     `).join("");
   }
@@ -434,6 +434,24 @@
       setStatus("bad", e.message || "Download failed");
       alert(`Download failed: ${e.message || e}`);
     }
+  });
+
+  // ===== NOTES TOOLTIP HELPER =====
+  function notesCell(notes) {
+    const text = normalize(notes);
+    if (!text) return '<span style="color:var(--text-muted,#aaa);font-size:11px;">&mdash;</span>';
+    return `<span class="notes-cell"><span class="notes-yes">Yes</span><div class="notes-tip">${escapeHtml(text)}</div></span>`;
+  }
+
+  // Position notes tooltip near cursor
+  document.addEventListener("mousemove", function(e) {
+    const tip = document.querySelector(".notes-cell:hover .notes-tip");
+    if (!tip) return;
+    const x = e.clientX + 14;
+    const y = e.clientY + 14;
+    const overRight = x + 290 > window.innerWidth;
+    tip.style.left = (overRight ? e.clientX - 294 : x) + "px";
+    tip.style.top = (y + 120 > window.innerHeight ? e.clientY - 130 : y) + "px";
   });
 
   // ===== INIT =====
