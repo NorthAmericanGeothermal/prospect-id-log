@@ -104,9 +104,10 @@ body{
   padding:0 1.5rem;
   height:54px;
   display:flex;align-items:center;gap:1rem;
-  position:sticky;top:0;left:0;z-index:100;
+  position:fixed;top:0;left:0;right:0;z-index:100;
   box-shadow:0 2px 8px rgba(0,0,0,.18);
 }
+.topbar-spacer{height:54px;}
 .topbar-logo{
   font-size:15px;font-weight:700;color:#fff;
   flex:1;letter-spacing:-0.2px;
@@ -369,6 +370,7 @@ td:first-child{
 </div>
 
 <!-- ── MAIN ── -->
+<div class="topbar-spacer"></div>
 <div class="main">
 
   <!-- LEFT: FORM PANEL -->
