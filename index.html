@@ -8,7 +8,8 @@
 <style>
 /* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;overflow-x:hidden;}
+html{width:100%;}
+body{width:100%;min-width:0;}
 
 /* ── TOKENS ── */
 :root{
@@ -103,11 +104,8 @@ body{
   padding:0 1.5rem;
   height:54px;
   display:flex;align-items:center;gap:1rem;
-  position:sticky;top:0;z-index:100;
+  position:sticky;top:0;left:0;z-index:100;
   box-shadow:0 2px 8px rgba(0,0,0,.18);
-  width:100vw;
-  left:0;
-  margin-left:0;
 }
 .topbar-logo{
   font-size:15px;font-weight:700;color:#fff;
