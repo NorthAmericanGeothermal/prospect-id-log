@@ -385,7 +385,7 @@
         renderAndCount();
         // Only sync to HCP if we have at least a name
     if ((payload.first_name || payload.last_name || payload.contact_email || payload.primary_phone)) {
-      createHCPCustomer(payload, ["prospect", out.prospect_id]);
+      createHCPCustomer(payload, [String(out.prospect_id), "Prospect"]);
     }
       } catch (err) {
         setStatus("bad", err.message || "Submit failed");
@@ -413,7 +413,7 @@
         await loadService();
         renderAndCount();
         if ((payload.first_name || payload.last_name || payload.contact_email || payload.primary_phone)) {
-      createHCPCustomer(payload, [out.service_id]);
+      createHCPCustomer(payload, [String(out.service_id)]);
     }
       } catch (err) {
         setStatus("bad", err.message || "Submit failed");
