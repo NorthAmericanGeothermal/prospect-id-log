@@ -6,149 +6,132 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzFhM2E2YiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIxMyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5OQTwvdGV4dD4KICA8dGV4dCB4PSIxNiIgeT0iMjMiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjYzAzOTJiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HRU88L3RleHQ+CiAgPGxpbmUgeDE9IjQiIHkxPSIyNiIgeDI9IjI4IiB5Mj0iMjYiIHN0cm9rZT0iI2MwMzkyYiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPC9zdmc+">
 <title>NAGeo Prospect ID System</title>
 <style>
-/* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0;}
-html{width:100%;}
-body{width:100%;min-width:0;}
+html,body{height:100%;}
 
-/* ── TOKENS ── */
 :root{
-  --navy:       #0f2341;
-  --navy-mid:   #1a3561;
-  --navy-light: #1e4080;
-  --accent:     #2e73d4;
+  --navy:        #0f2341;
+  --navy-mid:    #1a3561;
+  --navy-light:  #1e4080;
+  --accent:      #2e73d4;
   --accent-hover:#1d5cb8;
   --accent-light:#dbeafe;
-  --red:        #c0392b;
-  --bg:         #f0f2f5;
-  --surface:    #ffffff;
-  --border:     #e2e5ea;
-  --border-dark:#c8cdd6;
-  --text:       #0f1923;
-  --text-mid:   #4a5568;
-  --text-muted: #8a95a3;
-  --green:      #16a34a;
-  --green-bg:   #dcfce7;
-  --yellow:     #ca8a04;
-  --yellow-bg:  #fef9c3;
-  --red-bg:     #fee2e2;
-  --radius-sm:  6px;
-  --radius:     10px;
-  --radius-lg:  14px;
-  --shadow-sm:  0 1px 3px rgba(15,35,65,.07);
-  --shadow:     0 2px 8px rgba(15,35,65,.10);
+  --red:         #c0392b;
+  --bg:          #f0f2f5;
+  --surface:     #ffffff;
+  --border:      #e2e5ea;
+  --border-dark: #c8cdd6;
+  --text:        #0f1923;
+  --text-mid:    #4a5568;
+  --text-muted:  #8a95a3;
+  --green:       #16a34a;
+  --green-bg:    #dcfce7;
+  --radius-sm:   6px;
+  --radius:      10px;
+  --radius-lg:   14px;
+  --shadow-sm:   0 1px 4px rgba(15,35,65,.08);
+  --shadow:      0 4px 16px rgba(15,35,65,.12);
 }
 
-/* ── BASE ── */
 body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
   background:var(--bg);
   color:var(--text);
-  min-height:100vh;
   font-size:14px;
+  line-height:1.5;
 }
 
-/* ── GATE OVERLAY ── */
+/* ── GATE ── */
 #gateOverlay{
   position:fixed;inset:0;
-  background:var(--navy);
+  background:linear-gradient(135deg,#0a1628 0%,#0f2341 60%,#1a3a6b 100%);
   display:flex;align-items:center;justify-content:center;
   z-index:1000;
 }
 .gate-card{
-  background:var(--surface);
-  border-radius:var(--radius-lg);
-  padding:2.25rem 2rem;
-  width:340px;
+  background:#fff;
+  border-radius:20px;
+  padding:2.5rem 2rem 2rem;
+  width:360px;
   text-align:center;
-  box-shadow:var(--shadow);
+  box-shadow:0 24px 64px rgba(0,0,0,.35);
 }
-.gate-logo{
-  font-size:20px;font-weight:700;color:var(--navy);
-  margin-bottom:3px;letter-spacing:-0.3px;
+.gate-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:52px;height:52px;border-radius:14px;
+  background:var(--navy);
+  margin-bottom:1rem;
+  box-shadow:0 4px 12px rgba(15,35,65,.3);
 }
+.gate-badge svg{width:28px;height:28px;}
+.gate-logo{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:3px;letter-spacing:-0.5px;}
 .gate-logo span{color:var(--accent);}
-.gate-sub{
-  font-size:12px;color:var(--text-muted);
-  margin-bottom:1.75rem;
-  text-transform:uppercase;letter-spacing:0.6px;
-}
-.gate-label{
-  font-size:11px;font-weight:600;color:var(--text-mid);
-  text-align:left;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;
-}
+.gate-sub{font-size:11px;color:var(--text-muted);margin-bottom:2rem;text-transform:uppercase;letter-spacing:0.7px;}
+.gate-label{font-size:11px;font-weight:600;color:var(--text-mid);text-align:left;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
 #gatePassword{
-  width:100%;padding:10px 14px;
-  border:1px solid var(--border-dark);border-radius:var(--radius);
-  font-size:15px;text-align:center;letter-spacing:4px;
+  width:100%;padding:12px 16px;
+  border:1.5px solid var(--border-dark);border-radius:var(--radius);
+  font-size:18px;text-align:center;letter-spacing:6px;
   background:var(--bg);color:var(--text);
-  margin-bottom:10px;font-family:inherit;
+  margin-bottom:12px;font-family:inherit;
+  transition:border-color .15s,box-shadow .15s;
 }
-#gatePassword:focus{outline:none;border-color:var(--accent);background:#fff;}
+#gatePassword:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,115,212,.15);background:#fff;}
 #gateBtn{
-  width:100%;padding:11px;
+  width:100%;padding:12px;
   background:var(--navy);color:#fff;
   border:none;border-radius:var(--radius);
-  font-size:14px;font-weight:600;cursor:pointer;
-  letter-spacing:0.3px;transition:background .15s;
+  font-size:14px;font-weight:700;cursor:pointer;
+  letter-spacing:0.4px;transition:all .15s;
+  box-shadow:0 2px 8px rgba(15,35,65,.2);
 }
-#gateBtn:hover{background:var(--navy-light);}
-#gateError{
-  font-size:12px;color:var(--red);
-  margin-top:8px;display:none;
-}
+#gateBtn:hover{background:var(--navy-light);transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,35,65,.25);}
+#gateBtn:active{transform:none;}
+#gateError{font-size:12px;color:var(--red);margin-top:10px;display:none;font-weight:500;}
 
 /* ── TOPBAR ── */
 .topbar{
   background:var(--navy);
-  padding:0 1.5rem;
-  height:54px;
-  display:flex;align-items:center;gap:1rem;
+  padding:0 1.75rem;
+  height:56px;
+  display:flex;align-items:center;gap:1.25rem;
   position:fixed;top:0;left:0;right:0;z-index:100;
-  box-shadow:0 2px 8px rgba(0,0,0,.18);
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
 }
-.topbar-spacer{height:54px;}
 .topbar-logo{
-  font-size:15px;font-weight:700;color:#fff;
-  flex:1;letter-spacing:-0.2px;
+  font-size:15px;font-weight:800;color:#fff;
+  letter-spacing:-0.3px;flex:1;
 }
 .topbar-logo span{color:#6aadff;}
-.topbar-divider{width:1px;height:20px;background:rgba(255,255,255,.15);}
+.topbar-logo small{font-size:10px;font-weight:400;color:rgba(255,255,255,.4);margin-left:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.topbar-divider{width:1px;height:22px;background:rgba(255,255,255,.12);}
+.topbar-status{font-size:12px;color:rgba(255,255,255,.45);}
+.badge-ok{color:#6ee7b7;font-weight:700;}
+.badge-bad{color:#fca5a5;font-weight:700;}
+.badge-warn{color:#fde68a;font-weight:700;}
 
-/* ── TABS ── */
-.tabs{
-  display:flex;gap:4px;
-  background:rgba(255,255,255,.08);
-  border-radius:var(--radius);
-  padding:3px;
-}
+/* tabs */
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,.07);border-radius:9px;padding:3px;}
 .tab{
-  padding:5px 14px;font-size:13px;font-weight:500;
+  padding:5px 18px;font-size:13px;font-weight:500;
   border-radius:7px;border:none;
-  background:transparent;color:rgba(255,255,255,.6);
+  background:transparent;color:rgba(255,255,255,.55);
   cursor:pointer;transition:all .15s;white-space:nowrap;
 }
-.tab.active{background:#fff;color:var(--navy);font-weight:600;}
-.tab:not(.active):hover{background:rgba(255,255,255,.12);color:#fff;}
+.tab.active{background:#fff;color:var(--navy);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.tab:not(.active):hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
 
-/* status bar */
-.topbar-status{font-size:12px;color:rgba(255,255,255,.55);}
-.badge-ok{color:#6ee7b7;font-weight:600;}
-.badge-bad{color:#fca5a5;font-weight:600;}
-.badge-warn{color:#fde68a;font-weight:600;}
-
-/* ── MAIN LAYOUT ── */
-.main{
-  max-width:1300px;margin:0 auto;
-  padding:1.5rem 1.5rem;
+/* ── PAGE SHELL ── */
+.topbar-spacer{height:56px;}
+.page{
+  max-width:1400px;margin:0 auto;
+  padding:1.75rem 1.75rem;
   display:grid;
-  grid-template-columns:320px 1fr;
-  gap:1.25rem;
+  grid-template-columns:300px 1fr;
+  gap:1.5rem;
   align-items:start;
 }
-@media(max-width:860px){
-  .main{grid-template-columns:1fr;}
-}
+@media(max-width:900px){.page{grid-template-columns:1fr;}}
 
 /* ── FORM PANEL ── */
 .form-panel{
@@ -157,63 +140,64 @@ body{
   border:1px solid var(--border);
   box-shadow:var(--shadow-sm);
   overflow:hidden;
-  position:sticky;top:70px;
+  position:sticky;top:72px;
 }
-.form-panel-header{
-  background:var(--navy);
-  padding:14px 16px;
-  display:flex;align-items:center;gap:8px;
+.form-panel-hdr{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+  padding:16px 18px;
 }
-#formTitle{
-  font-size:13px;font-weight:600;color:#fff;
-  flex:1;
-}
-.pill{
-  font-size:10px;padding:2px 8px;border-radius:4px;
-  background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);
-  white-space:nowrap;
-}
-.form-body{padding:1rem;}
+.form-panel-hdr-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;}
+.form-panel-hdr-sub{font-size:11px;color:rgba(255,255,255,.55);}
+#formPill{display:none;} /* driven by JS text on formTitle */
+.form-body{padding:1.1rem 1rem;}
 
-/* form elements */
-.fg{margin-bottom:10px;}
+/* field groups */
+.fg{margin-bottom:11px;}
 .fg label{
-  display:block;font-size:11px;font-weight:600;
-  color:var(--text-mid);margin-bottom:4px;
-  text-transform:uppercase;letter-spacing:0.5px;
+  display:block;font-size:10px;font-weight:700;
+  color:var(--text-muted);margin-bottom:4px;
+  text-transform:uppercase;letter-spacing:0.6px;
 }
 .fg input,.fg select,.fg textarea{
-  width:100%;padding:8px 10px;
-  border:1px solid var(--border-dark);border-radius:var(--radius-sm);
+  width:100%;padding:8px 11px;
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);
   font-size:13px;font-family:inherit;
-  background:var(--bg);color:var(--text);
-  transition:border-color .15s,background .15s;
+  background:#fafbfc;color:var(--text);
+  transition:border-color .15s,box-shadow .15s,background .15s;
+  appearance:none;
 }
 .fg input:focus,.fg select:focus,.fg textarea:focus{
-  outline:none;border-color:var(--accent);background:#fff;
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(46,115,212,.12);
+  background:#fff;
 }
-.fg textarea{resize:vertical;min-height:60px;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.form-divider{
-  font-size:10px;font-weight:700;color:var(--text-muted);
-  text-transform:uppercase;letter-spacing:0.8px;
-  margin:12px 0 8px;padding-bottom:5px;
-  border-bottom:1px solid var(--border);
-}
+.fg input::placeholder,.fg textarea::placeholder{color:#bec5cf;}
+.fg textarea{resize:vertical;min-height:58px;line-height:1.5;}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a95a3' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
 
-/* submit button */
-.submit-btn{
-  width:100%;padding:10px;margin-top:4px;
-  background:var(--navy);color:#fff;
-  border:none;border-radius:var(--radius);
-  font-size:13px;font-weight:600;cursor:pointer;
-  letter-spacing:0.3px;transition:background .15s;
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.form-section{
+  font-size:10px;font-weight:700;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.7px;
+  margin:14px 0 10px;
+  display:flex;align-items:center;gap:8px;
 }
-.submit-btn:hover{background:var(--navy-light);}
-.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+.form-section::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.submit-btn{
+  width:100%;padding:11px;margin-top:6px;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+  color:#fff;border:none;border-radius:var(--radius);
+  font-size:13px;font-weight:700;cursor:pointer;
+  letter-spacing:0.3px;transition:all .15s;
+  box-shadow:0 2px 6px rgba(15,35,65,.2);
+}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,35,65,.25);}
+.submit-btn:active{transform:none;}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
 /* ── RIGHT PANEL ── */
-.right-panel{display:flex;flex-direction:column;gap:1rem;}
+.right-panel{display:flex;flex-direction:column;gap:1.25rem;}
 
 /* ── LOG CARD ── */
 .log-card{
@@ -223,124 +207,132 @@ body{
   box-shadow:var(--shadow-sm);
   overflow:hidden;
 }
-.log-card-header{
-  padding:12px 16px;
-  display:flex;align-items:center;gap:10px;
+.log-card-hdr{
+  padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
   border-bottom:1px solid var(--border);
-  background:var(--bg);
+  flex-wrap:wrap;gap:10px;
 }
-#logTitle{
-  font-size:13px;font-weight:600;color:var(--text);flex:1;
-}
+#logTitle{font-size:14px;font-weight:700;color:var(--text);flex:1;min-width:120px;}
 #logTitle .pill{
+  display:inline-block;
+  font-size:10px;padding:2px 8px;border-radius:4px;
   background:var(--accent-light);color:var(--accent);
-  font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;
+  font-weight:700;margin-left:6px;vertical-align:middle;
 }
 
-/* search + toolbar */
+/* toolbar */
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 #searchBox{
-  flex:1;min-width:160px;
-  padding:7px 12px;
-  border:1px solid var(--border-dark);border-radius:var(--radius);
+  flex:1;min-width:180px;
+  padding:8px 14px 8px 36px;
+  border:1.5px solid var(--border);border-radius:var(--radius);
   font-size:13px;font-family:inherit;
-  background:#fff;color:var(--text);
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a95a3' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 11px center;
+  color:var(--text);transition:border-color .15s,box-shadow .15s;
 }
-#searchBox:focus{outline:none;border-color:var(--accent);}
+#searchBox:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,115,212,.12);}
+#searchBox::placeholder{color:#bec5cf;}
+
 .icon-btn{
-  padding:7px 12px;
-  border:1px solid var(--border-dark);border-radius:var(--radius);
+  padding:8px 14px;
+  border:1.5px solid var(--border);border-radius:var(--radius);
   background:#fff;color:var(--text-mid);
-  font-size:12px;cursor:pointer;white-space:nowrap;
+  font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;
   transition:all .15s;
 }
-.icon-btn:hover{background:var(--bg);border-color:var(--accent);color:var(--accent);}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+
 .dl-btn{
-  padding:7px 12px;
-  border:none;border-radius:var(--radius);
+  padding:8px 14px;
+  border:1.5px solid transparent;border-radius:var(--radius);
   font-size:12px;font-weight:600;cursor:pointer;
-  transition:background .15s;white-space:nowrap;
+  transition:all .15s;white-space:nowrap;
 }
-#downloadCsvBtn{background:var(--green-bg);color:var(--green);}
+#downloadCsvBtn{background:var(--green-bg);color:var(--green);border-color:#86efac;}
 #downloadCsvBtn:hover{background:#bbf7d0;}
-#downloadXlsxBtn{background:#ede9fe;color:#6d28d9;}
+#downloadXlsxBtn{background:#ede9fe;color:#6d28d9;border-color:#c4b5fd;}
 #downloadXlsxBtn:hover{background:#ddd6fe;}
 
-/* count bar */
-.count-bar{
-  font-size:11px;color:var(--text-muted);
-  padding:6px 16px;
+/* meta bar */
+.meta-bar{
+  padding:8px 18px;
   border-bottom:1px solid var(--border);
-  background:var(--bg);
+  background:#fafbfc;
+  font-size:11px;color:var(--text-muted);
+  display:flex;align-items:center;gap:6px;
 }
-#countShown{font-weight:700;color:var(--text);}
+#countShown{font-weight:700;color:var(--text);font-size:13px;}
 
-/* status footer */
 .status-bar{
-  padding:7px 16px;
+  padding:8px 18px;
   border-top:1px solid var(--border);
-  background:var(--bg);
+  background:#fafbfc;
   font-size:11px;color:var(--text-muted);
 }
 
 /* ── TABLE ── */
 .table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-thead{position:sticky;top:0;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead tr{background:var(--navy);}
 th{
-  padding:9px 12px;text-align:left;
-  background:var(--navy);color:rgba(255,255,255,.75);
-  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;
-  white-space:nowrap;
+  padding:10px 14px;text-align:left;
+  color:rgba(255,255,255,.7);
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;
+  white-space:nowrap;border-right:1px solid rgba(255,255,255,.06);
 }
-th:first-child{border-radius:0;}
+th:last-child{border-right:none;}
 td{
-  padding:9px 12px;
+  padding:10px 14px;
   border-bottom:1px solid var(--border);
-  color:var(--text);vertical-align:top;
+  color:var(--text);vertical-align:middle;
   white-space:nowrap;
+  transition:background .1s;
 }
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:#f6f8fc;}
+tbody tr:hover td{background:#f4f7ff;}
 td:first-child{
   font-weight:700;color:var(--accent);
-  font-family:'SF Mono',monospace;font-size:11px;
+  font-family:'SF Mono','Fira Code',monospace;font-size:11.5px;
+  letter-spacing:0.3px;
 }
+tbody tr:nth-child(even) td{background:#fafbfc;}
+tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 
 /* ── NOTES TOOLTIP ── */
-.notes-cell{
-  position:relative;
-  cursor:default;
-  white-space:nowrap;
-}
+.notes-cell{position:relative;cursor:default;}
 .notes-yes{
-  display:inline-block;
-  font-size:10px;font-weight:700;
-  padding:2px 8px;border-radius:4px;
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:5px;
   background:var(--accent-light);color:var(--accent);
-  cursor:pointer;
+  cursor:pointer;white-space:nowrap;
 }
+.notes-yes::before{content:'📝';font-size:10px;}
 .notes-tip{
   display:none;
   position:fixed;
   background:var(--navy);color:#fff;
-  font-size:12px;line-height:1.6;
-  padding:10px 14px;border-radius:8px;
-  width:280px;white-space:normal;
+  font-size:12px;line-height:1.65;
+  padding:12px 16px;border-radius:10px;
+  width:300px;white-space:normal;
   z-index:500;pointer-events:none;
-  box-shadow:0 4px 16px rgba(0,0,0,.25);
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+  border:1px solid rgba(255,255,255,.08);
 }
 .notes-cell:hover .notes-tip{display:block;}
 
+/* ── RESPONSIVE ── */
 @media(max-width:600px){
-  .topbar{padding:0 .75rem;height:auto;flex-wrap:wrap;padding:8px 12px;gap:6px;}
-  .topbar-logo{font-size:14px;width:100%;}
+  .topbar{padding:0 1rem;height:auto;flex-wrap:wrap;padding:10px 12px;gap:8px;}
+  .topbar-logo{width:100%;}
   .tabs{width:100%;}
-  .tab{flex:1;text-align:center;font-size:12px;padding:5px 8px;}
-  .main{padding:1rem .75rem;}
+  .tab{flex:1;text-align:center;font-size:12px;}
+  .page{padding:1rem .75rem;}
   .form-row{grid-template-columns:1fr;}
   .toolbar{flex-direction:column;align-items:stretch;}
   #searchBox{min-width:unset;}
+  .log-card-hdr{flex-direction:column;align-items:stretch;}
 }
 </style>
 </head>
@@ -349,36 +341,43 @@ td:first-child{
 <!-- ── GATE ── -->
 <div id="gateOverlay">
   <div class="gate-card">
+    <div class="gate-badge">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="16" y="13" font-family="Georgia,serif" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle">NA</text>
+        <text x="16" y="23" font-family="Georgia,serif" font-size="8" font-weight="bold" fill="#c0392b" text-anchor="middle">GEO</text>
+        <line x1="4" y1="26" x2="28" y2="26" stroke="#c0392b" stroke-width="1.5"/>
+      </svg>
+    </div>
     <div class="gate-logo">NAGeo <span>Prospects</span></div>
     <div class="gate-sub">North American Geothermal &mdash; ID System</div>
     <div class="gate-label">Password</div>
-    <input type="password" id="gatePassword" placeholder="Enter password" autocomplete="current-password">
-    <button id="gateBtn">Unlock</button>
-    <div id="gateError">Incorrect password. Try again.</div>
+    <input type="password" id="gatePassword" placeholder="••••••••••" autocomplete="current-password">
+    <button id="gateBtn">Unlock System</button>
+    <div id="gateError">Incorrect password &mdash; please try again.</div>
   </div>
 </div>
 
 <!-- ── TOPBAR ── -->
 <div class="topbar">
-  <div class="topbar-logo">NAGeo <span>Prospects</span></div>
+  <div class="topbar-logo">NAGeo <span>Prospects</span> <small>ID System</small></div>
   <div class="tabs">
-    <button class="tab active" id="tabProspects">Prospects</button>
-    <button class="tab" id="tabService">Service</button>
+    <button class="tab active" id="tabProspects">🏠 Prospects</button>
+    <button class="tab" id="tabService">🔧 Service</button>
   </div>
   <div class="topbar-divider"></div>
   <div class="topbar-status" id="statusTopbar">Status: <span class="badge-warn">Locked</span></div>
 </div>
-
-<!-- ── MAIN ── -->
 <div class="topbar-spacer"></div>
-<div class="main">
 
-  <!-- LEFT: FORM PANEL -->
+<!-- ── PAGE ── -->
+<div class="main page">
+
+  <!-- FORM PANEL -->
   <div class="form-panel">
-    <div class="form-panel-header">
-      <div id="formTitle">New Prospect Lead Entry <span id="formPill" class="pill">Creates next 5-digit Prospect ID</span></div>
+    <div class="form-panel-hdr">
+      <div class="form-panel-hdr-title" id="formTitle">New Prospect Lead Entry <span id="formPill"></span></div>
+      <div class="form-panel-hdr-sub">All fields save directly to the cloud</div>
     </div>
-
     <div class="form-body">
 
       <!-- PROSPECT FORM -->
@@ -387,23 +386,25 @@ td:first-child{
           <label>Entered by</label>
           <input type="text" name="entered_by" placeholder="Your name" required>
         </div>
-        <div class="fg">
-          <label>Date</label>
-          <input type="date" name="entered_date">
-        </div>
-        <div class="fg">
-          <label>Source</label>
-          <select name="source" required>
-            <option value="">Select source…</option>
-            <option>Website</option>
-            <option>Referral</option>
-            <option>Builder</option>
-            <option>Phone</option>
-            <option>Other</option>
-          </select>
+        <div class="form-row">
+          <div class="fg">
+            <label>Date</label>
+            <input type="date" name="entered_date">
+          </div>
+          <div class="fg">
+            <label>Source</label>
+            <select name="source" required>
+              <option value="">Select…</option>
+              <option>Website</option>
+              <option>Referral</option>
+              <option>Builder</option>
+              <option>Phone</option>
+              <option>Other</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-divider">Builder info</div>
+        <div class="form-section">Builder</div>
         <div class="form-row">
           <div class="fg">
             <label>Builder name</label>
@@ -415,7 +416,7 @@ td:first-child{
           </div>
         </div>
 
-        <div class="form-divider">Customer info</div>
+        <div class="form-section">Customer</div>
         <div class="form-row">
           <div class="fg">
             <label>First name</label>
@@ -431,22 +432,12 @@ td:first-child{
           <input type="text" name="street_address" placeholder="123 Main St">
         </div>
         <div class="form-row">
-          <div class="fg">
-            <label>City</label>
-            <input type="text" name="city">
-          </div>
-          <div class="fg">
-            <label>State</label>
-            <input type="text" name="state" placeholder="VA">
-          </div>
+          <div class="fg"><label>City</label><input type="text" name="city"></div>
+          <div class="fg"><label>State</label><input type="text" name="state" placeholder="VA"></div>
         </div>
-        <div class="fg">
-          <label>ZIP</label>
-          <input type="text" name="zip" placeholder="22030">
-        </div>
-        <div class="fg">
-          <label>Phone</label>
-          <input type="tel" name="primary_phone">
+        <div class="form-row">
+          <div class="fg"><label>ZIP</label><input type="text" name="zip" placeholder="22030"></div>
+          <div class="fg"><label>Phone</label><input type="tel" name="primary_phone"></div>
         </div>
         <div class="fg">
           <label>Email</label>
@@ -456,7 +447,7 @@ td:first-child{
           <label>Notes</label>
           <textarea name="notes" placeholder="Any additional notes…"></textarea>
         </div>
-        <button type="submit" class="submit-btn" id="submitBtn">Submit Prospect</button>
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Prospect →</button>
       </form>
 
       <!-- SERVICE FORM -->
@@ -470,102 +461,66 @@ td:first-child{
           <input type="date" name="entered_date">
         </div>
 
-        <div class="form-divider">Customer info</div>
+        <div class="form-section">Customer</div>
         <div class="form-row">
-          <div class="fg">
-            <label>First name</label>
-            <input type="text" name="first_name" placeholder="First" required>
-          </div>
-          <div class="fg">
-            <label>Last name</label>
-            <input type="text" name="last_name" placeholder="Last" required>
-          </div>
+          <div class="fg"><label>First name</label><input type="text" name="first_name" placeholder="First" required></div>
+          <div class="fg"><label>Last name</label><input type="text" name="last_name" placeholder="Last" required></div>
         </div>
         <div class="fg">
           <label>Street address</label>
           <input type="text" name="street_address" placeholder="123 Main St">
         </div>
         <div class="form-row">
-          <div class="fg">
-            <label>City</label>
-            <input type="text" name="city">
-          </div>
-          <div class="fg">
-            <label>State</label>
-            <input type="text" name="state" placeholder="VA">
-          </div>
+          <div class="fg"><label>City</label><input type="text" name="city"></div>
+          <div class="fg"><label>State</label><input type="text" name="state" placeholder="VA"></div>
         </div>
-        <div class="fg">
-          <label>ZIP</label>
-          <input type="text" name="zip" placeholder="22030">
+        <div class="form-row">
+          <div class="fg"><label>ZIP</label><input type="text" name="zip" placeholder="22030"></div>
+          <div class="fg"><label>Primary phone</label><input type="tel" name="primary_phone"></div>
         </div>
 
-        <div class="form-divider">Contact</div>
-        <div class="fg">
-          <label>Primary phone</label>
-          <input type="tel" name="primary_phone">
+        <div class="form-section">Additional Contact</div>
+        <div class="form-row">
+          <div class="fg"><label>Cell phone</label><input type="tel" name="cell_phone"></div>
+          <div class="fg"><label>Work phone</label><input type="tel" name="work_phone"></div>
         </div>
-        <div class="fg">
-          <label>Cell phone</label>
-          <input type="tel" name="cell_phone">
-        </div>
-        <div class="fg">
-          <label>Work phone</label>
-          <input type="tel" name="work_phone">
-        </div>
-        <div class="fg">
-          <label>Email</label>
-          <input type="email" name="contact_email">
-        </div>
+        <div class="fg"><label>Email</label><input type="email" name="contact_email"></div>
         <div class="fg">
           <label>Notes</label>
           <textarea name="notes" placeholder="Any additional notes…"></textarea>
         </div>
-        <button type="submit" class="submit-btn" id="svcSubmitBtn">Submit Service Customer</button>
+        <button type="submit" class="submit-btn" id="svcSubmitBtn">Submit Service Customer →</button>
       </form>
 
-    </div><!-- /form-body -->
-  </div><!-- /form-panel -->
+    </div>
+  </div>
 
-  <!-- RIGHT: LOG -->
+  <!-- RIGHT PANEL -->
   <div class="right-panel">
     <div class="log-card">
-      <div class="log-card-header">
+      <div class="log-card-hdr">
         <div id="logTitle">Prospect ID Log <span class="pill">Read-only</span></div>
         <div class="toolbar">
-          <input type="text" id="searchBox" placeholder="Search ID / name / builder / phone…">
-          <button class="icon-btn" id="refreshBtn">&#8635; Refresh</button>
-          <button class="dl-btn" id="downloadCsvBtn">&#8595; CSV</button>
-          <button class="dl-btn" id="downloadXlsxBtn">&#8595; Excel</button>
+          <input type="text" id="searchBox" placeholder="Search name, ID, phone, email…">
+          <button class="icon-btn" id="refreshBtn">⟳ Refresh</button>
+          <button class="dl-btn" id="downloadCsvBtn">↓ CSV</button>
+          <button class="dl-btn" id="downloadXlsxBtn">↓ Excel</button>
         </div>
       </div>
 
-      <div class="count-bar">Showing <span id="countShown">0</span> records</div>
+      <div class="meta-bar"><span id="countShown">0</span> records</div>
 
       <!-- PROSPECT TABLE -->
       <div class="table-wrap" id="prospectTable">
         <table>
-          <thead>
-            <tr>
-              <th>Prospect ID</th>
-              <th>Entered By</th>
-              <th>Date</th>
-              <th>Source</th>
-              <th>Builder Name</th>
-              <th>Builder Phone</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Address</th>
-              <th>City</th>
-              <th>State</th>
-              <th>ZIP</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>Prospect ID</th><th>Entered By</th><th>Date</th><th>Source</th>
+            <th>Builder Name</th><th>Builder Phone</th><th>First Name</th><th>Last Name</th>
+            <th>Address</th><th>City</th><th>State</th><th>ZIP</th>
+            <th>Phone</th><th>Email</th><th>Notes</th>
+          </tr></thead>
           <tbody id="prospectBody">
-            <tr><td colspan="15" style="padding:20px;color:var(--text-muted);text-align:center;">Unlock to view records.</td></tr>
+            <tr><td colspan="15" style="padding:32px;color:var(--text-muted);text-align:center;font-size:13px;">🔒 Unlock to view records</td></tr>
           </tbody>
         </table>
       </div>
@@ -573,39 +528,25 @@ td:first-child{
       <!-- SERVICE TABLE -->
       <div class="table-wrap" id="serviceTable" style="display:none">
         <table>
-          <thead>
-            <tr>
-              <th>Service ID</th>
-              <th>Entered By</th>
-              <th>Date</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Address</th>
-              <th>City</th>
-              <th>State</th>
-              <th>ZIP</th>
-              <th>Primary Phone</th>
-              <th>Cell Phone</th>
-              <th>Work Phone</th>
-              <th>Email</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>Service ID</th><th>Entered By</th><th>Date</th><th>First Name</th><th>Last Name</th>
+            <th>Address</th><th>City</th><th>State</th><th>ZIP</th>
+            <th>Primary Phone</th><th>Cell Phone</th><th>Work Phone</th><th>Email</th><th>Notes</th>
+          </tr></thead>
           <tbody id="serviceBody">
-            <tr><td colspan="14" style="padding:20px;color:var(--text-muted);text-align:center;">Unlock to view records.</td></tr>
+            <tr><td colspan="14" style="padding:32px;color:var(--text-muted);text-align:center;font-size:13px;">🔒 Unlock to view records</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="status-bar" id="statusLeft">Status: <span class="badge-warn">Locked</span></div>
     </div>
-  </div><!-- /right-panel -->
+  </div>
 
-</div><!-- /main -->
+</div>
 
 <script src="app.js"></script>
 <script>
-// Mirror status updates to topbar badge
 (function(){
   var bottom = document.getElementById('statusLeft');
   var top = document.getElementById('statusTopbar');
