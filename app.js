@@ -168,6 +168,16 @@
 
       logTitle.innerHTML = `Prospect ID Log <span class="pill">Read-only</span>`;
       searchBox.placeholder = "Search ID / name / builder / phone…";
+      const neb = document.getElementById("newEntryBtn");
+      if (neb) neb.textContent = "＋ New Prospect";
+      const mt = document.getElementById("entryModalTitle");
+      const ms = document.getElementById("entryModalSub");
+      if (mt) mt.textContent = "New Prospect Lead Entry";
+      if (ms) ms.textContent = "Creates next 5-digit Prospect ID";
+      const sb = document.getElementById("submitBtn");
+      const sc = document.getElementById("svcSubmitBtn");
+      if (sb) sb.style.display = "";
+      if (sc) sc.style.display = "none";
     } else {
       tabProspects.classList.remove("active");
       tabService.classList.add("active");
@@ -184,6 +194,16 @@
 
       logTitle.innerHTML = `Service Customer ID Log <span class="pill">Read-only</span>`;
       searchBox.placeholder = "Search ID / name / phone / email…";
+      const neb2 = document.getElementById("newEntryBtn");
+      if (neb2) neb2.textContent = "＋ New Service Customer";
+      const mt2 = document.getElementById("entryModalTitle");
+      const ms2 = document.getElementById("entryModalSub");
+      if (mt2) mt2.textContent = "New Service Customer Entry";
+      if (ms2) ms2.textContent = "Creates next Service Customer ID";
+      const sb2 = document.getElementById("submitBtn");
+      const sc2 = document.getElementById("svcSubmitBtn");
+      if (sb2) sb2.style.display = "none";
+      if (sc2) sc2.style.display = "";
     }
   }
 
@@ -351,6 +371,7 @@
       const out = await apiPost("/api/leads", payload);
       setStatus("ok", `Saved Prospect ID ${out.prospect_id} — creating HCP profile…`);
       leadForm.reset();
+      closeEntryModal();
       await loadProspects();
       renderAndCount();
       // Create customer in HCP with prospect tag + ID tag (non-blocking)
@@ -386,6 +407,7 @@
       const out = await apiPost("/api/service/customers", payload);
       setStatus("ok", `Saved Service ID ${out.service_id} — creating HCP profile…`);
       serviceForm.reset();
+      closeEntryModal();
       await loadService();
       renderAndCount();
       // Create customer in HCP with service ID tag (non-blocking)
@@ -516,6 +538,16 @@
     document.getElementById("del-modal-bg").style.display = "none";
   }
 
+  function openEntryModal() {
+    const bg = document.getElementById("entry-modal-bg");
+    if (bg) bg.style.display = "flex";
+  }
+
+  function closeEntryModal() {
+    const bg = document.getElementById("entry-modal-bg");
+    if (bg) bg.style.display = "none";
+  }
+
   function delStep1() {
     const pw = document.getElementById("del-pw").value;
     const err = document.getElementById("del-err");
@@ -582,6 +614,18 @@
   }
 
   document.getElementById("deleteRecordBtn").addEventListener("click", openDeleteModal);
+  document.getElementById("newEntryBtn").addEventListener("click", function() {
+    if (!unlocked) { alert("Please unlock the system first."); return; }
+    openEntryModal();
+  });
+
+  // expose modal helpers globally
+  window.openEntryModal = openEntryModal;
+  window.closeEntryModal = closeEntryModal;
+  window.closeDeleteModal = closeDeleteModal;
+  window.delStep1 = delStep1;
+  window.delStep2 = delStep2;
+  window.delStep3 = delStep3;
 
   // ===== INIT =====
   setActiveTab();
