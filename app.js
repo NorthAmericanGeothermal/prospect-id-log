@@ -5,6 +5,11 @@
   const REMEMBER_KEY = "nageo_prospects_unlocked";
   const REMEMBER_DAYS = 30;
 
+  // Supabase project — same as swift-api
+  const SUPABASE_URL = "https://hpgwwegjsxyxovdattoc.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_D2PqYQoJjZ8koEM9NPvmeg_KB_Wa66H";
+  const HCP_CREATE_FN = `${SUPABASE_URL}/functions/v1/hcp-create-customer`;
+
   // ===== ELEMENTS =====
   const gateOverlay = document.getElementById("gateOverlay");
   const gatePassword = document.getElementById("gatePassword");
@@ -344,10 +349,12 @@
       submitBtn.disabled = true;
       setStatus("warn", "Submitting…");
       const out = await apiPost("/api/leads", payload);
-      setStatus("ok", `Saved Prospect ID ${out.prospect_id}`);
+      setStatus("ok", `Saved Prospect ID ${out.prospect_id} — creating HCP profile…`);
       leadForm.reset();
       await loadProspects();
       renderAndCount();
+      // Create customer in HCP with prospect tag + ID tag (non-blocking)
+      createHCPCustomer(payload, ["prospect", out.prospect_id]);
     } catch (err) {
       setStatus("bad", err.message || "Submit failed");
       alert(`Submit failed: ${err.message || err}`);
@@ -377,10 +384,12 @@
       svcSubmitBtn.disabled = true;
       setStatus("warn", "Submitting…");
       const out = await apiPost("/api/service/customers", payload);
-      setStatus("ok", `Saved Service ID ${out.service_id}`);
+      setStatus("ok", `Saved Service ID ${out.service_id} — creating HCP profile…`);
       serviceForm.reset();
       await loadService();
       renderAndCount();
+      // Create customer in HCP with service ID tag (non-blocking)
+      createHCPCustomer(payload, [out.service_id]);
     } catch (err) {
       setStatus("bad", err.message || "Submit failed");
       alert(`Submit failed: ${err.message || err}`);
@@ -436,7 +445,43 @@
     }
   });
 
-  // ===== NOTES TOOLTIP HELPER =====
+  // ===== HCP CUSTOMER CREATION =====
+  async function createHCPCustomer(payload, tags) {
+    try {
+      const res = await fetch(HCP_CREATE_FN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "apikey": SUPABASE_KEY,
+        },
+        body: JSON.stringify({
+          first_name:     payload.first_name    || "",
+          last_name:      payload.last_name     || "",
+          street_address: payload.street_address|| "",
+          city:           payload.city          || "",
+          state:          payload.state         || "",
+          zip:            payload.zip           || "",
+          primary_phone:  payload.primary_phone || "",
+          contact_email:  payload.contact_email || "",
+          notes:          payload.notes         || "",
+          tags:           tags,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.warn("HCP customer creation failed:", data);
+        setStatus("warn", "Saved locally — HCP sync failed. Check console.");
+      } else {
+        setStatus("ok", `Saved & synced to HCP (ID: ${data.hcp_customer_id || "?"})`);
+      }
+    } catch (err) {
+      console.warn("HCP create error:", err);
+      setStatus("warn", "Saved locally — HCP sync error. Check console.");
+    }
+  }
+
+    // ===== NOTES TOOLTIP HELPER =====
   function notesCell(notes) {
     const text = normalize(notes);
     if (!text) return '<span style="color:var(--text-muted,#aaa);font-size:11px;">&mdash;</span>';
