@@ -127,29 +127,13 @@ body{
   max-width:1400px;margin:0 auto;
   padding:1.75rem 1.75rem;
   display:grid;
-  grid-template-columns:300px 1fr;
+  grid-template-columns:1fr;
   gap:1.5rem;
   align-items:start;
 }
-@media(max-width:900px){.page{grid-template-columns:1fr;}}
 
-/* ── FORM PANEL ── */
-.form-panel{
-  background:var(--surface);
-  border-radius:var(--radius-lg);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow-sm);
-  overflow:hidden;
-  position:sticky;top:72px;
-}
-.form-panel-hdr{
-  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
-  padding:16px 18px;
-}
-.form-panel-hdr-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;}
-.form-panel-hdr-sub{font-size:11px;color:rgba(255,255,255,.55);}
-#formPill{display:none;} /* driven by JS text on formTitle */
-.form-body{padding:1.1rem 1rem;}
+
+/* form panel removed — now a modal */
 
 /* field groups */
 .fg{margin-bottom:11px;}
@@ -398,6 +382,39 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
   transition:all .15s;
 }
 .del-record-btn:hover{background:#fee2e2;border-color:#dc2626;}
+
+/* ── NEW ENTRY MODAL ── */
+.entry-modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,22,40,.55);backdrop-filter:blur(4px);
+  z-index:400;align-items:flex-start;justify-content:center;
+  padding-top:60px;
+}
+.entry-modal{
+  background:#fff;border-radius:var(--radius-lg);
+  width:520px;max-width:96vw;max-height:88vh;
+  box-shadow:0 24px 64px rgba(0,0,0,.28);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.entry-modal-hdr{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+  padding:16px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.entry-modal-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.entry-modal-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;}
+.entry-modal-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;line-height:1;padding:0 4px;}
+.entry-modal-close:hover{color:#fff;}
+.entry-modal-body{padding:1.25rem 1.25rem 1rem;overflow-y:auto;flex:1;}
+.entry-modal-footer{padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;flex-shrink:0;}
+.new-entry-btn{
+  padding:8px 16px;
+  border:none;border-radius:var(--radius);
+  background:var(--navy);color:#fff;
+  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  transition:all .15s;box-shadow:0 2px 6px rgba(15,35,65,.2);
+}
+.new-entry-btn:hover{background:var(--navy-light);transform:translateY(-1px);}
 </style>
 </head>
 <body>
@@ -436,128 +453,6 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 <!-- ── PAGE ── -->
 <div class="main page">
 
-  <!-- FORM PANEL -->
-  <div class="form-panel">
-    <div class="form-panel-hdr">
-      <div class="form-panel-hdr-title" id="formTitle">New Prospect Lead Entry <span id="formPill"></span></div>
-      <div class="form-panel-hdr-sub">All fields save directly to the cloud</div>
-    </div>
-    <div class="form-body">
-
-      <!-- PROSPECT FORM -->
-      <form id="leadForm">
-        <div class="fg">
-          <label>Entered by</label>
-          <input type="text" name="entered_by" placeholder="Your name" required>
-        </div>
-        <div class="form-row">
-          <div class="fg">
-            <label>Date</label>
-            <input type="date" name="entered_date">
-          </div>
-          <div class="fg">
-            <label>Source</label>
-            <select name="source" required>
-              <option value="">Select…</option>
-              <option>Website</option>
-              <option>Referral</option>
-              <option>Builder</option>
-              <option>Phone</option>
-              <option>Other</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-section">Builder</div>
-        <div class="form-row">
-          <div class="fg">
-            <label>Builder name</label>
-            <input type="text" name="builder_name" placeholder="Optional">
-          </div>
-          <div class="fg">
-            <label>Builder phone</label>
-            <input type="tel" name="builder_phone" placeholder="Optional">
-          </div>
-        </div>
-
-        <div class="form-section">Customer</div>
-        <div class="form-row">
-          <div class="fg">
-            <label>First name</label>
-            <input type="text" name="first_name" placeholder="First">
-          </div>
-          <div class="fg">
-            <label>Last name</label>
-            <input type="text" name="last_name" placeholder="Last">
-          </div>
-        </div>
-        <div class="fg">
-          <label>Street address</label>
-          <input type="text" name="street_address" placeholder="123 Main St">
-        </div>
-        <div class="form-row">
-          <div class="fg"><label>City</label><input type="text" name="city"></div>
-          <div class="fg"><label>State</label><input type="text" name="state" placeholder="VA"></div>
-        </div>
-        <div class="form-row">
-          <div class="fg"><label>ZIP</label><input type="text" name="zip" placeholder="22030"></div>
-          <div class="fg"><label>Phone</label><input type="tel" name="primary_phone"></div>
-        </div>
-        <div class="fg">
-          <label>Email</label>
-          <input type="email" name="contact_email">
-        </div>
-        <div class="fg">
-          <label>Notes</label>
-          <textarea name="notes" placeholder="Any additional notes…"></textarea>
-        </div>
-        <button type="submit" class="submit-btn" id="submitBtn">Submit Prospect →</button>
-      </form>
-
-      <!-- SERVICE FORM -->
-      <form id="serviceForm" style="display:none">
-        <div class="fg">
-          <label>Entered by</label>
-          <input type="text" name="entered_by" placeholder="Your name" required>
-        </div>
-        <div class="fg">
-          <label>Date</label>
-          <input type="date" name="entered_date">
-        </div>
-
-        <div class="form-section">Customer</div>
-        <div class="form-row">
-          <div class="fg"><label>First name</label><input type="text" name="first_name" placeholder="First" required></div>
-          <div class="fg"><label>Last name</label><input type="text" name="last_name" placeholder="Last" required></div>
-        </div>
-        <div class="fg">
-          <label>Street address</label>
-          <input type="text" name="street_address" placeholder="123 Main St">
-        </div>
-        <div class="form-row">
-          <div class="fg"><label>City</label><input type="text" name="city"></div>
-          <div class="fg"><label>State</label><input type="text" name="state" placeholder="VA"></div>
-        </div>
-        <div class="form-row">
-          <div class="fg"><label>ZIP</label><input type="text" name="zip" placeholder="22030"></div>
-          <div class="fg"><label>Primary phone</label><input type="tel" name="primary_phone"></div>
-        </div>
-
-        <div class="form-section">Additional Contact</div>
-        <div class="form-row">
-          <div class="fg"><label>Cell phone</label><input type="tel" name="cell_phone"></div>
-          <div class="fg"><label>Work phone</label><input type="tel" name="work_phone"></div>
-        </div>
-        <div class="fg"><label>Email</label><input type="email" name="contact_email"></div>
-        <div class="fg">
-          <label>Notes</label>
-          <textarea name="notes" placeholder="Any additional notes…"></textarea>
-        </div>
-        <button type="submit" class="submit-btn" id="svcSubmitBtn">Submit Service Customer →</button>
-      </form>
-
-    </div>
-  </div>
 
   <!-- RIGHT PANEL -->
   <div class="right-panel">
@@ -567,6 +462,7 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
         <div class="toolbar">
           <input type="text" id="searchBox" placeholder="Search name, ID, phone, email…">
           <button class="icon-btn" id="refreshBtn">⟳ Refresh</button>
+          <button class="new-entry-btn" id="newEntryBtn">＋ New Prospect</button>
           <button class="dl-btn" id="downloadCsvBtn">↓ CSV</button>
           <button class="dl-btn" id="downloadXlsxBtn">↓ Excel</button>
           <button class="del-record-btn" id="deleteRecordBtn">🗑 Delete ID</button>
@@ -680,6 +576,102 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
         <code>if (req.method === "DELETE" && path.startsWith("/api/leads/")) { ... }</code><br><br>
         Contact your developer or ask Claude to help add the DELETE route to the worker.
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NEW ENTRY MODAL ── -->
+<div class="entry-modal-bg" id="entry-modal-bg" onclick="if(event.target===this)closeEntryModal()">
+  <div class="entry-modal">
+    <div class="entry-modal-hdr">
+      <div>
+        <div class="entry-modal-title" id="entryModalTitle">New Prospect Lead Entry</div>
+        <div class="entry-modal-sub" id="entryModalSub">Creates next 5-digit Prospect ID</div>
+      </div>
+      <button class="entry-modal-close" onclick="closeEntryModal()">&#x2715;</button>
+    </div>
+    <div class="entry-modal-body">
+
+      <!-- PROSPECT FORM -->
+      <form id="leadForm">
+        <div class="fg">
+          <label>Entered by</label>
+          <input type="text" name="entered_by" placeholder="Your name" required>
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Date</label>
+            <input type="date" name="entered_date">
+          </div>
+          <div class="fg">
+            <label>Source</label>
+            <select name="source" required>
+              <option value="">Select…</option>
+              <option>Website</option>
+              <option>Referral</option>
+              <option>Builder</option>
+              <option>Phone</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-section">Builder</div>
+        <div class="form-row">
+          <div class="fg"><label>Builder name</label><input type="text" name="builder_name" placeholder="Optional"></div>
+          <div class="fg"><label>Builder phone</label><input type="tel" name="builder_phone" placeholder="Optional"></div>
+        </div>
+        <div class="form-section">Customer</div>
+        <div class="form-row">
+          <div class="fg"><label>First name</label><input type="text" name="first_name" placeholder="First"></div>
+          <div class="fg"><label>Last name</label><input type="text" name="last_name" placeholder="Last"></div>
+        </div>
+        <div class="fg"><label>Street address</label><input type="text" name="street_address" placeholder="123 Main St"></div>
+        <div class="form-row">
+          <div class="fg"><label>City</label><input type="text" name="city"></div>
+          <div class="fg"><label>State</label><input type="text" name="state" placeholder="VA"></div>
+        </div>
+        <div class="form-row">
+          <div class="fg"><label>ZIP</label><input type="text" name="zip" placeholder="22030"></div>
+          <div class="fg"><label>Phone</label><input type="tel" name="primary_phone"></div>
+        </div>
+        <div class="fg"><label>Email</label><input type="email" name="contact_email"></div>
+        <div class="fg"><label>Notes</label><textarea name="notes" placeholder="Any additional notes…"></textarea></div>
+      </form>
+
+      <!-- SERVICE FORM -->
+      <form id="serviceForm" style="display:none">
+        <div class="fg">
+          <label>Entered by</label>
+          <input type="text" name="entered_by" placeholder="Your name" required>
+        </div>
+        <div class="fg"><label>Date</label><input type="date" name="entered_date"></div>
+        <div class="form-section">Customer</div>
+        <div class="form-row">
+          <div class="fg"><label>First name</label><input type="text" name="first_name" placeholder="First" required></div>
+          <div class="fg"><label>Last name</label><input type="text" name="last_name" placeholder="Last" required></div>
+        </div>
+        <div class="fg"><label>Street address</label><input type="text" name="street_address" placeholder="123 Main St"></div>
+        <div class="form-row">
+          <div class="fg"><label>City</label><input type="text" name="city"></div>
+          <div class="fg"><label>State</label><input type="text" name="state" placeholder="VA"></div>
+        </div>
+        <div class="form-row">
+          <div class="fg"><label>ZIP</label><input type="text" name="zip" placeholder="22030"></div>
+          <div class="fg"><label>Primary phone</label><input type="tel" name="primary_phone"></div>
+        </div>
+        <div class="form-section">Additional Contact</div>
+        <div class="form-row">
+          <div class="fg"><label>Cell phone</label><input type="tel" name="cell_phone"></div>
+          <div class="fg"><label>Work phone</label><input type="tel" name="work_phone"></div>
+        </div>
+        <div class="fg"><label>Email</label><input type="email" name="contact_email"></div>
+        <div class="fg"><label>Notes</label><textarea name="notes" placeholder="Any additional notes…"></textarea></div>
+      </form>
+
+    </div>
+    <div class="entry-modal-footer">
+      <button type="button" class="submit-btn" id="submitBtn" onclick="document.getElementById('leadForm').requestSubmit()">Submit Prospect →</button>
+      <button type="button" class="submit-btn" id="svcSubmitBtn" style="display:none" onclick="document.getElementById('serviceForm').requestSubmit()">Submit Service Customer →</button>
     </div>
   </div>
 </div>
