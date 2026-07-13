@@ -354,12 +354,15 @@
   document.addEventListener("input", function(e) { if (e.target && e.target.id === "searchBox") renderAndCount(); });
 
   // ===== SUBMIT: PROSPECT =====
+  let _submitting = false;
   document.addEventListener("submit", async (e) => {
     const isLead = e.target.id === "leadForm";
     const isSvc  = e.target.id === "serviceForm";
     if (!isLead && !isSvc) return;
     e.preventDefault();
     if (!unlocked) return;
+    if (_submitting) return; // prevent double-fire
+    _submitting = true;
 
     const fd = new FormData(e.target);
     const payload = Object.fromEntries(fd.entries());
@@ -389,6 +392,7 @@
         alert(`Submit failed: ${err.message || err}`);
       } finally {
         if (submitBtn()) { submitBtn().disabled = false; }
+        _submitting = false;
       }
     } else {
       // ===== SERVICE SUBMIT =====
@@ -416,6 +420,7 @@
         alert(`Submit failed: ${err.message || err}`);
       } finally {
         if (svcSubmitBtn()) { svcSubmitBtn().disabled = false; }
+        _submitting = false;
       }
     }
   });
@@ -620,8 +625,8 @@
     else if (id === "refreshBtn") { if (unlocked) loadCurrentView(); }
     else if (id === "downloadCsvBtn") { if (unlocked) handleCsvDownload(); }
     else if (id === "downloadXlsxBtn") { if (unlocked) handleXlsxDownload(); }
-    else if (id === "submitBtn") { var lf = leadForm(); if(lf) lf.requestSubmit(); }
-    else if (id === "svcSubmitBtn") { var sf = serviceForm(); if(sf) sf.requestSubmit(); }
+    else if (id === "submitBtn") { var lf = leadForm(); if(lf) { var ev = new Event("submit", {bubbles:true, cancelable:true}); lf.dispatchEvent(ev); } }
+    else if (id === "svcSubmitBtn") { var sf = serviceForm(); if(sf) { var ev2 = new Event("submit", {bubbles:true, cancelable:true}); sf.dispatchEvent(ev2); } }
   });
 
   // expose modal helpers globally
