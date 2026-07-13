@@ -160,15 +160,15 @@
       tabProspects.classList.add("active");
       tabService.classList.remove("active");
 
-      leadForm().style.display = "";
-      serviceForm().style.display = "none";
+      if(leadForm()) leadForm().style.display = "";
+      if(serviceForm()) serviceForm().style.display = "none";
 
-      prospectTable().style.display = "";
-      serviceTable().style.display = "none";
+      if(prospectTable()) prospectTable().style.display = "";
+      if(serviceTable()) serviceTable().style.display = "none";
 
-      formTitle().childNodes[0].textContent = "New Prospect Lead Entry ";
-      formPill.textContent = "Creates next 5-digit Prospect ID";
-      submitBtn().textContent = "Submit Prospect";
+      if(formTitle()) formTitle().childNodes[0].textContent = "New Prospect Lead Entry ";
+      const fp = el('formPill'); if(fp) fp.textContent = "Creates next 5-digit Prospect ID";
+      if(submitBtn()) submitBtn().textContent = "Submit Prospect →";
 
       logTitle().innerHTML = `Prospect ID Log <span class="pill">Read-only</span>`;
       searchBox().placeholder = "Search ID / name / builder / phone…";
@@ -186,15 +186,15 @@
       tabProspects.classList.remove("active");
       tabService.classList.add("active");
 
-      leadForm().style.display = "none";
-      serviceForm().style.display = "";
+      if(leadForm()) leadForm().style.display = "none";
+      if(serviceForm()) serviceForm().style.display = "";
 
-      prospectTable().style.display = "none";
-      serviceTable().style.display = "";
+      if(prospectTable()) prospectTable().style.display = "none";
+      if(serviceTable()) serviceTable().style.display = "";
 
-      formTitle().childNodes[0].textContent = "New Service Customer Entry ";
-      formPill.textContent = "Creates next Service Customer ID";
-      svcSubmitBtn().textContent = "Submit Service Customer";
+      if(formTitle()) formTitle().childNodes[0].textContent = "New Service Customer Entry ";
+      const fp2 = el('formPill'); if(fp2) fp2.textContent = "Creates next Service Customer ID";
+      if(svcSubmitBtn()) svcSubmitBtn().textContent = "Submit Service Customer →";
 
       logTitle().innerHTML = `Service Customer ID Log <span class="pill">Read-only</span>`;
       searchBox().placeholder = "Search ID / name / phone / email…";
@@ -380,7 +380,10 @@
         closeEntryModal();
         await loadProspects();
         renderAndCount();
-        createHCPCustomer(payload, ["prospect", out.prospect_id]);
+        // Only sync to HCP if we have at least a name
+    if ((payload.first_name || payload.last_name || payload.contact_email || payload.primary_phone)) {
+      createHCPCustomer(payload, ["prospect", out.prospect_id]);
+    }
       } catch (err) {
         setStatus("bad", err.message || "Submit failed");
         alert(`Submit failed: ${err.message || err}`);
@@ -405,7 +408,9 @@
         closeEntryModal();
         await loadService();
         renderAndCount();
-        createHCPCustomer(payload, [out.service_id]);
+        if ((payload.first_name || payload.last_name || payload.contact_email || payload.primary_phone)) {
+      createHCPCustomer(payload, [out.service_id]);
+    }
       } catch (err) {
         setStatus("bad", err.message || "Submit failed");
         alert(`Submit failed: ${err.message || err}`);
@@ -550,10 +555,13 @@
     const id = document.getElementById("del-id").value.trim();
     const err = document.getElementById("del-err");
     if (!id) { err.textContent = "Please enter the ID."; return; }
+    const idUpper = id.toUpperCase().trim();
     const exists = view === "prospects"
-      ? prospectRows.some(r => r.prospect_id === id)
-      : serviceRows.some(r => r.service_id === id);
-    if (!exists) { err.textContent = `ID "${id}" not found in current view.`; return; }
+      ? prospectRows.some(r => (r.prospect_id || "").toString().trim() === idUpper)
+      : serviceRows.some(r => (r.service_id || "").toString().trim() === idUpper);
+    if (!exists) { err.textContent = `ID "${id}" not found. Check the current tab (Prospects vs Service) and try again.`; return; }
+    // store normalized
+    document.getElementById("del-id").value = idUpper;
     err.textContent = "";
     document.getElementById("del-step2").style.display = "none";
     document.getElementById("del-step3").style.display = "";
@@ -587,10 +595,11 @@
         err.textContent = `Delete failed (${res.status}): ${txt || "unknown error"}`;
         delBtn.disabled = false; delBtn.textContent = "Confirm Delete"; return;
       }
+      const idNorm = id.toUpperCase().trim();
       if (view === "prospects") {
-        prospectRows = prospectRows.filter(r => r.prospect_id !== id);
+        prospectRows = prospectRows.filter(r => (r.prospect_id || "").toString().trim() !== idNorm);
       } else {
-        serviceRows = serviceRows.filter(r => r.service_id !== id);
+        serviceRows = serviceRows.filter(r => (r.service_id || "").toString().trim() !== idNorm);
       }
       renderAndCount();
       closeDeleteModal();
