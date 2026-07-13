@@ -75,7 +75,8 @@
 
   const setStatus = (kind, msg) => {
     const cls = kind === "ok" ? "badge-ok" : (kind === "bad" ? "badge-bad" : "badge-warn");
-    statusLeft().innerHTML = `Status: <span class="${cls}">${escapeHtml(msg)}</span>`;
+    const sl = statusLeft();
+    if (sl) sl.innerHTML = `Status: <span class="${cls}">${escapeHtml(msg)}</span>`;
   };
 
   function downloadBlob(filename, blob) {
@@ -606,7 +607,7 @@
       if (c.mobile_number) html += '<div style="font-size:12px;color:var(--text-muted);">' + c.mobile_number + '</div>';
       html += '<div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">' + score + ' field' + (score !== 1 ? "s" : "") + ' matched</div>';
       html += '</div>';
-      html += '<button onclick="tagExistingHCPCustomer('' + c.id + '')" style="flex-shrink:0;padding:8px 14px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Tag this profile</button>';
+      html += '<button onclick="tagExistingHCPCustomer("' + c.id + '")" style="flex-shrink:0;padding:8px 14px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Tag this profile</button>';
       html += '</div></div>';
     });
     body.innerHTML = html;
@@ -758,11 +759,21 @@
   window.delStep3 = delStep3;
 
   // ===== INIT =====
-  setActiveTab();
+  try {
+    setActiveTab();
+  } catch(e) { console.error("setActiveTab error:", e); }
+
   // Auto-unlock if this device remembered the password within 30 days
-  if (checkRemember()) {
-    unlock();
-  } else {
-    setStatus("warn", "Locked");
+  try {
+    if (checkRemember()) {
+      unlock();
+    } else {
+      setStatus("warn", "Locked");
+    }
+  } catch(e) {
+    console.error("Init error:", e);
+    // Fallback — make sure gate is visible even if init crashes
+    var go = document.getElementById("gateOverlay");
+    if (go) go.style.display = "flex";
   }
 })();
