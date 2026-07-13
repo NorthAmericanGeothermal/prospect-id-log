@@ -466,6 +466,9 @@
   }
 
   // ===== HCP CUSTOMER CREATION =====
+  var _pendingHCPPayload = null;
+  var _pendingHCPTags = null;
+
   async function createHCPCustomer(payload, tags) {
     try {
       const res = await fetch(HCP_CREATE_FN, {
@@ -476,15 +479,15 @@
           "apikey": SUPABASE_KEY,
         },
         body: JSON.stringify({
-          first_name:     payload.first_name    || "",
-          last_name:      payload.last_name     || "",
-          street_address: payload.street_address|| "",
-          city:           payload.city          || "",
-          state:          payload.state         || "",
-          zip:            payload.zip           || "",
-          primary_phone:  payload.primary_phone || "",
-          contact_email:  payload.contact_email || "",
-          notes:          payload.notes         || "",
+          first_name:     payload.first_name     || "",
+          last_name:      payload.last_name      || "",
+          street_address: payload.street_address || "",
+          city:           payload.city           || "",
+          state:          payload.state          || "",
+          zip:            payload.zip            || "",
+          primary_phone:  payload.primary_phone  || "",
+          contact_email:  payload.contact_email  || "",
+          notes:          payload.notes          || "",
           tags:           tags,
         }),
       });
@@ -492,13 +495,127 @@
       if (!res.ok) {
         console.warn("HCP customer creation failed:", data);
         setStatus("warn", "Saved locally — HCP sync failed. Check console.");
-      } else {
-        setStatus("ok", `Saved & synced to HCP (ID: ${data.hcp_customer_id || "?"})`);
+        return;
       }
+      if (data.duplicates_found && data.candidates && data.candidates.length > 0) {
+        // Store for later use by modal buttons
+        _pendingHCPPayload = payload;
+        _pendingHCPTags = tags;
+        showDuplicateModal(data.candidates, tags);
+        return;
+      }
+      if (data.skipped) {
+        setStatus("ok", "Saved locally (no HCP profile — no identifying info provided).");
+        return;
+      }
+      setStatus("ok", `Saved & synced to HCP (ID: ${data.hcp_customer_id || "?"})`);
     } catch (err) {
       console.warn("HCP create error:", err);
       setStatus("warn", "Saved locally — HCP sync error. Check console.");
     }
+  }
+
+  async function tagExistingHCPCustomer(hcpId) {
+    closeDuplicateModal();
+    try {
+      setStatus("warn", "Tagging existing HCP profile…");
+      const res = await fetch(HCP_CREATE_FN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "apikey": SUPABASE_KEY,
+        },
+        body: JSON.stringify({
+          action: "tag_existing",
+          hcp_customer_id: hcpId,
+          tags: _pendingHCPTags || [],
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) {
+        setStatus("warn", "Could not tag existing HCP profile. Check console.");
+        console.warn("Tag existing failed:", data);
+      } else {
+        setStatus("ok", `Tagged existing HCP profile (ID: ${hcpId})`);
+      }
+    } catch (err) {
+      console.warn("Tag existing error:", err);
+      setStatus("warn", "Saved locally — HCP tag error. Check console.");
+    }
+    _pendingHCPPayload = null;
+    _pendingHCPTags = null;
+  }
+
+  async function createNewHCPAnyway() {
+    closeDuplicateModal();
+    if (!_pendingHCPPayload || !_pendingHCPTags) return;
+    const payload = _pendingHCPPayload;
+    const tags = _pendingHCPTags;
+    _pendingHCPPayload = null;
+    _pendingHCPTags = null;
+    try {
+      setStatus("warn", "Creating new HCP profile…");
+      const res = await fetch(HCP_CREATE_FN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "apikey": SUPABASE_KEY,
+        },
+        body: JSON.stringify({
+          action: "force_create",
+          first_name:     payload.first_name     || "",
+          last_name:      payload.last_name      || "",
+          street_address: payload.street_address || "",
+          city:           payload.city           || "",
+          state:          payload.state          || "",
+          zip:            payload.zip            || "",
+          primary_phone:  payload.primary_phone  || "",
+          contact_email:  payload.contact_email  || "",
+          notes:          payload.notes          || "",
+          tags:           tags,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("warn", "Saved locally — HCP create failed. Check console.");
+      } else {
+        setStatus("ok", `New HCP profile created (ID: ${data.hcp_customer_id || "?"})`);
+      }
+    } catch (err) {
+      setStatus("warn", "Saved locally — HCP create error. Check console.");
+    }
+  }
+
+  function showDuplicateModal(candidates, tags) {
+    var body = document.getElementById("dup-modal-body");
+    if (!body) return;
+    var html = '<p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;">We found <strong>' + candidates.length + '</strong> possible existing HCP profile' + (candidates.length !== 1 ? "s" : "") + ' that may match. Choose one to tag, or create a new profile.</p>';
+    candidates.forEach(function(c) {
+      var name = ((c.first_name || "") + " " + (c.last_name || "")).trim() || "Unknown";
+      var addrs = c.addresses && c.addresses.length ? c.addresses[0] : null;
+      var addr = addrs ? [addrs.street, addrs.city, addrs.state, addrs.zip].filter(Boolean).join(", ") : "";
+      var score = c._score || 0;
+      html += '<div style="border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">';
+      html += '<div style="flex:1">';
+      html += '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">' + name + '</div>';
+      if (addr) html += '<div style="font-size:12px;color:var(--text-muted);">' + addr + '</div>';
+      if (c.email) html += '<div style="font-size:12px;color:var(--text-muted);">' + c.email + '</div>';
+      if (c.mobile_number) html += '<div style="font-size:12px;color:var(--text-muted);">' + c.mobile_number + '</div>';
+      html += '<div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">' + score + ' field' + (score !== 1 ? "s" : "") + ' matched</div>';
+      html += '</div>';
+      html += '<button onclick="tagExistingHCPCustomer('' + c.id + '')" style="flex-shrink:0;padding:8px 14px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Tag this profile</button>';
+      html += '</div></div>';
+    });
+    body.innerHTML = html;
+    document.getElementById("dup-modal-bg").style.display = "flex";
+  }
+
+  function closeDuplicateModal() {
+    var bg = document.getElementById("dup-modal-bg");
+    if (bg) bg.style.display = "none";
   }
 
     // ===== NOTES TOOLTIP HELPER =====
@@ -631,6 +748,9 @@
 
   // expose modal helpers globally
   window.openEntryModal = openEntryModal;
+  window.tagExistingHCPCustomer = tagExistingHCPCustomer;
+  window.createNewHCPAnyway = createNewHCPAnyway;
+  window.closeDuplicateModal = closeDuplicateModal;
   window.closeEntryModal = closeEntryModal;
   window.closeDeleteModal = closeDeleteModal;
   window.delStep1 = delStep1;
