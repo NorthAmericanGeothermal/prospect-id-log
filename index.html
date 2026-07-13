@@ -415,6 +415,31 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
   transition:all .15s;box-shadow:0 2px 6px rgba(15,35,65,.2);
 }
 .new-entry-btn:hover{background:var(--navy-light);transform:translateY(-1px);}
+
+/* ── DUPLICATE MATCH MODAL ── */
+.dup-modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,22,40,.6);backdrop-filter:blur(4px);
+  z-index:600;align-items:flex-start;justify-content:center;
+  padding-top:70px;
+}
+.dup-modal{
+  background:#fff;border-radius:var(--radius-lg);
+  width:520px;max-width:96vw;max-height:82vh;
+  box-shadow:0 24px 64px rgba(0,0,0,.28);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.dup-modal-hdr{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+  padding:16px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.dup-modal-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.dup-modal-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;line-height:1;padding:0 4px;}
+.dup-modal-close:hover{color:#fff;}
+.dup-modal-body{padding:1.25rem;overflow-y:auto;flex:1;}
+.dup-modal-footer{padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;flex-shrink:0;display:flex;justify-content:flex-end;}
+.dup-create-anyway{padding:9px 18px;border:1.5px solid var(--border-dark);border-radius:var(--radius);background:#fff;color:var(--text-mid);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.dup-create-anyway:hover{background:var(--bg);border-color:var(--accent);color:var(--accent);}
 </style>
 </head>
 <body>
@@ -670,8 +695,22 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 
     </div>
     <div class="entry-modal-footer">
-      <button type="button" class="submit-btn" id="submitBtn" onclick="document.getElementById('leadForm').requestSubmit()">Submit Prospect →</button>
-      <button type="button" class="submit-btn" id="svcSubmitBtn" style="display:none" onclick="document.getElementById('serviceForm').requestSubmit()">Submit Service Customer →</button>
+      <button type="button" class="submit-btn" id="submitBtn">Submit Prospect →</button>
+      <button type="button" class="submit-btn" id="svcSubmitBtn" style="display:none">Submit Service Customer →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DUPLICATE MATCH MODAL ── -->
+<div class="dup-modal-bg" id="dup-modal-bg" onclick="if(event.target===this)closeDuplicateModal()">
+  <div class="dup-modal">
+    <div class="dup-modal-hdr">
+      <div class="dup-modal-title">⚠️ Possible existing HCP profile found</div>
+      <button class="dup-modal-close" onclick="closeDuplicateModal()">&#x2715;</button>
+    </div>
+    <div class="dup-modal-body" id="dup-modal-body"></div>
+    <div class="dup-modal-footer">
+      <button class="dup-create-anyway" onclick="createNewHCPAnyway()">None of these — create new profile</button>
     </div>
   </div>
 </div>
