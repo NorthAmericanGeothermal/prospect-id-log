@@ -334,6 +334,70 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
   #searchBox{min-width:unset;}
   .log-card-hdr{flex-direction:column;align-items:stretch;}
 }
+
+/* ── DELETE MODAL ── */
+.del-modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,22,40,.6);backdrop-filter:blur(3px);
+  z-index:500;align-items:center;justify-content:center;
+}
+.del-modal{
+  background:#fff;border-radius:var(--radius-lg);
+  width:400px;max-width:95vw;
+  box-shadow:0 24px 64px rgba(0,0,0,.3);
+  overflow:hidden;
+}
+.del-modal-hdr{
+  background:linear-gradient(135deg,#7f1d1d,#dc2626);
+  padding:16px 20px;display:flex;align-items:center;gap:10px;
+}
+.del-modal-hdr-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.del-modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;padding:0 4px;}
+.del-modal-close:hover{color:#fff;}
+.del-modal-body{padding:1.5rem;}
+.del-step-label{
+  font-size:11px;font-weight:700;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;
+}
+.del-step-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.del-step-sub{font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+.del-input{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border-dark);border-radius:var(--radius);
+  font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);
+  margin-bottom:10px;transition:border-color .15s,box-shadow .15s;
+}
+.del-input:focus{outline:none;border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.12);background:#fff;}
+.del-input.danger{letter-spacing:3px;font-weight:700;text-transform:uppercase;}
+.del-next-btn{
+  width:100%;padding:10px;border:none;border-radius:var(--radius);
+  background:var(--navy);color:#fff;
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.del-next-btn:hover{background:var(--navy-light);}
+#del-go-btn{background:#dc2626;}
+#del-go-btn:hover{background:#b91c1c;}
+#del-go-btn:disabled{opacity:.5;cursor:not-allowed;}
+.del-err{font-size:12px;color:#dc2626;font-weight:500;margin-top:6px;min-height:18px;}
+.del-steps-indicator{display:flex;gap:6px;margin-bottom:1.25rem;}
+.del-step-dot{
+  flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .2s;
+}
+.del-step-dot.active{background:#dc2626;}
+.del-worker-hint{
+  display:none;margin-top:12px;padding:10px 14px;
+  background:#fef2f2;border:1px solid #fca5a5;border-radius:var(--radius-sm);
+  font-size:11px;color:#7f1d1d;line-height:1.6;
+}
+.del-worker-hint code{background:#fee2e2;padding:1px 5px;border-radius:3px;font-family:monospace;}
+.del-record-btn{
+  padding:8px 14px;
+  border:1.5px solid #fca5a5;border-radius:var(--radius);
+  background:#fff;color:#dc2626;
+  font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.del-record-btn:hover{background:#fee2e2;border-color:#dc2626;}
 </style>
 </head>
 <body>
@@ -505,6 +569,7 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
           <button class="icon-btn" id="refreshBtn">⟳ Refresh</button>
           <button class="dl-btn" id="downloadCsvBtn">↓ CSV</button>
           <button class="dl-btn" id="downloadXlsxBtn">↓ Excel</button>
+          <button class="del-record-btn" id="deleteRecordBtn">🗑 Delete ID</button>
         </div>
       </div>
 
@@ -548,6 +613,15 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 <script src="app.js"></script>
 <script>
 (function(){
+  window.updateDots = function(step) {
+    for (var i = 1; i <= 3; i++) {
+      var d = document.getElementById("dot"+i);
+      if (d) d.classList.toggle("active", i <= step);
+    }
+  };
+  window.closeDeleteModal = function() {
+    document.getElementById("del-modal-bg").style.display = "none";
+  };
   var bottom = document.getElementById('statusLeft');
   var top = document.getElementById('statusTopbar');
   if(!bottom||!top) return;
@@ -555,5 +629,59 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
   obs.observe(bottom, {childList:true,subtree:true,characterData:true});
 })();
 </script>
+
+<!-- ── DELETE MODAL ── -->
+<div class="del-modal-bg" id="del-modal-bg">
+  <div class="del-modal">
+    <div class="del-modal-hdr">
+      <div class="del-modal-hdr-title">🗑 Delete Record</div>
+      <button class="del-modal-close" onclick="closeDeleteModal()">&#x2715;</button>
+    </div>
+    <div class="del-modal-body">
+      <div class="del-steps-indicator">
+        <div class="del-step-dot active" id="dot1"></div>
+        <div class="del-step-dot" id="dot2"></div>
+        <div class="del-step-dot" id="dot3"></div>
+      </div>
+
+      <!-- Step 1: Password -->
+      <div id="del-step1">
+        <div class="del-step-label">Step 1 of 3</div>
+        <div class="del-step-title">Confirm your password</div>
+        <div class="del-step-sub">Enter the site password to begin the deletion process.</div>
+        <input type="password" class="del-input" id="del-pw" placeholder="Site password"
+          onkeydown="if(event.key==='Enter') delStep1()">
+        <button class="del-next-btn" onclick="delStep1(); updateDots(2);">Continue →</button>
+      </div>
+
+      <!-- Step 2: Enter ID -->
+      <div id="del-step2" style="display:none">
+        <div class="del-step-label">Step 2 of 3</div>
+        <div class="del-step-title">Enter the ID to delete</div>
+        <div class="del-step-sub">Type the exact 5-digit ID (e.g. <strong>P-00042</strong> or <strong>S-00007</strong>). It must exist in the current tab.</div>
+        <input type="text" class="del-input" id="del-id" placeholder="e.g. P-00042"
+          onkeydown="if(event.key==='Enter') delStep2()">
+        <button class="del-next-btn" onclick="delStep2(); updateDots(3);">Continue →</button>
+      </div>
+
+      <!-- Step 3: Type DELETE -->
+      <div id="del-step3" style="display:none">
+        <div class="del-step-label">Step 3 of 3</div>
+        <div class="del-step-title">Final confirmation</div>
+        <div class="del-step-sub">Type <strong>DELETE</strong> in all caps to permanently remove this record. This cannot be undone.</div>
+        <input type="text" class="del-input danger" id="del-confirm" placeholder="DELETE"
+          onkeydown="if(event.key==='Enter') delStep3()">
+        <button class="del-next-btn" id="del-go-btn" onclick="delStep3()">Confirm Delete</button>
+      </div>
+
+      <div class="del-err" id="del-err"></div>
+      <div class="del-worker-hint" id="del-worker-hint">
+        Your Cloudflare Worker doesn't have a DELETE route yet. Add this to your worker:<br><br>
+        <code>if (req.method === "DELETE" && path.startsWith("/api/leads/")) { ... }</code><br><br>
+        Contact your developer or ask Claude to help add the DELETE route to the worker.
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
