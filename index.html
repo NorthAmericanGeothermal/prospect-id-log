@@ -92,12 +92,13 @@ body{
 /* ── TOPBAR ── */
 .topbar{
   background:var(--navy);
-  padding:0 1.75rem;
-  height:56px;
-  display:flex;align-items:center;gap:1.25rem;
+  padding:0 1.25rem;
+  height:48px;
+  display:flex;align-items:center;gap:1rem;
   position:fixed;top:0;left:0;right:0;z-index:100;
   box-shadow:0 2px 12px rgba(0,0,0,.25);
 }
+.topbar-spacer{height:48px;}
 .topbar-logo{
   font-size:15px;font-weight:800;color:#fff;
   letter-spacing:-0.3px;flex:1;
@@ -122,14 +123,14 @@ body{
 .tab:not(.active):hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
 
 /* ── PAGE SHELL ── */
-.topbar-spacer{height:56px;}
 .page{
-  max-width:1400px;margin:0 auto;
-  padding:1.75rem 1.75rem;
+  width:100%;
+  padding:1rem 1.25rem;
   display:grid;
   grid-template-columns:1fr;
-  gap:1.5rem;
+  gap:1rem;
   align-items:start;
+  box-sizing:border-box;
 }
 
 
@@ -181,7 +182,7 @@ body{
 .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
 /* ── RIGHT PANEL ── */
-.right-panel{display:flex;flex-direction:column;gap:1.25rem;}
+.right-panel{display:flex;flex-direction:column;gap:1rem;min-width:0;}
 
 /* ── LOG CARD ── */
 .log-card{
@@ -190,6 +191,10 @@ body{
   border:1px solid var(--border);
   box-shadow:var(--shadow-sm);
   overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  height:calc(100vh - 56px - 2rem);
+  min-height:500px;
 }
 .log-card-hdr{
   padding:14px 18px;
@@ -240,23 +245,25 @@ body{
 
 /* meta bar */
 .meta-bar{
-  padding:8px 18px;
+  padding:6px 14px;
   border-bottom:1px solid var(--border);
   background:#fafbfc;
   font-size:11px;color:var(--text-muted);
   display:flex;align-items:center;gap:6px;
+  flex-shrink:0;
 }
 #countShown{font-weight:700;color:var(--text);font-size:13px;}
 
 .status-bar{
-  padding:8px 18px;
+  padding:6px 14px;
   border-top:1px solid var(--border);
   background:#fafbfc;
   font-size:11px;color:var(--text-muted);
+  flex-shrink:0;
 }
 
 /* ── TABLE ── */
-.table-wrap{overflow-x:auto;}
+.table-wrap{overflow-x:auto;overflow-y:auto;flex:1;}
 table{width:100%;border-collapse:collapse;font-size:12.5px;}
 thead tr{background:var(--navy);}
 th{
@@ -312,7 +319,7 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
   .topbar-logo{width:100%;}
   .tabs{width:100%;}
   .tab{flex:1;text-align:center;font-size:12px;}
-  .page{padding:1rem .75rem;}
+  .page{padding:.5rem .5rem;}
   .form-row{grid-template-columns:1fr;}
   .toolbar{flex-direction:column;align-items:stretch;}
   #searchBox{min-width:unset;}
