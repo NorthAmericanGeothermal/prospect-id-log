@@ -499,6 +499,90 @@
     tip.style.top = (y + 120 > window.innerHeight ? e.clientY - 130 : y) + "px";
   });
 
+  // ===== DELETE RECORD =====
+  function openDeleteModal() {
+    document.getElementById("del-step1").style.display = "";
+    document.getElementById("del-step2").style.display = "none";
+    document.getElementById("del-step3").style.display = "none";
+    document.getElementById("del-pw").value = "";
+    document.getElementById("del-id").value = "";
+    document.getElementById("del-confirm").value = "";
+    document.getElementById("del-err").textContent = "";
+    document.getElementById("del-worker-hint").style.display = "none";
+    document.getElementById("del-modal-bg").style.display = "flex";
+  }
+
+  function closeDeleteModal() {
+    document.getElementById("del-modal-bg").style.display = "none";
+  }
+
+  function delStep1() {
+    const pw = document.getElementById("del-pw").value;
+    const err = document.getElementById("del-err");
+    if (pw !== PASSWORD) { err.textContent = "Incorrect password."; return; }
+    err.textContent = "";
+    document.getElementById("del-step1").style.display = "none";
+    document.getElementById("del-step2").style.display = "";
+    document.getElementById("del-id").focus();
+  }
+
+  function delStep2() {
+    const id = document.getElementById("del-id").value.trim();
+    const err = document.getElementById("del-err");
+    if (!id) { err.textContent = "Please enter the ID."; return; }
+    const exists = view === "prospects"
+      ? prospectRows.some(r => r.prospect_id === id)
+      : serviceRows.some(r => r.service_id === id);
+    if (!exists) { err.textContent = `ID "${id}" not found in current view.`; return; }
+    err.textContent = "";
+    document.getElementById("del-step2").style.display = "none";
+    document.getElementById("del-step3").style.display = "";
+    document.getElementById("del-confirm").focus();
+  }
+
+  async function delStep3() {
+    const confirmVal = document.getElementById("del-confirm").value.trim();
+    const id = document.getElementById("del-id").value.trim();
+    const err = document.getElementById("del-err");
+    if (confirmVal !== "DELETE") { err.textContent = "Type DELETE in all caps to confirm."; return; }
+    err.textContent = "";
+    const delBtn = document.getElementById("del-go-btn");
+    delBtn.disabled = true; delBtn.textContent = "Deleting…";
+    try {
+      const path = view === "prospects"
+        ? `/api/leads/${encodeURIComponent(id)}`
+        : `/api/service/customers/${encodeURIComponent(id)}`;
+      const res = await fetch(`${WORKER_BASE}${path}`, { method: "DELETE" });
+      if (res.status === 404) {
+        err.textContent = "Record not found — may already be deleted.";
+        delBtn.disabled = false; delBtn.textContent = "Confirm Delete"; return;
+      }
+      if (res.status === 405 || res.status === 501) {
+        err.textContent = "Worker doesn\'t support DELETE yet — see hint below.";
+        document.getElementById("del-worker-hint").style.display = "";
+        delBtn.disabled = false; delBtn.textContent = "Confirm Delete"; return;
+      }
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        err.textContent = `Delete failed (${res.status}): ${txt || "unknown error"}`;
+        delBtn.disabled = false; delBtn.textContent = "Confirm Delete"; return;
+      }
+      if (view === "prospects") {
+        prospectRows = prospectRows.filter(r => r.prospect_id !== id);
+      } else {
+        serviceRows = serviceRows.filter(r => r.service_id !== id);
+      }
+      renderAndCount();
+      closeDeleteModal();
+      setStatus("ok", `Record ${id} deleted.`);
+    } catch (e) {
+      err.textContent = "Network error: " + e.message;
+      delBtn.disabled = false; delBtn.textContent = "Confirm Delete";
+    }
+  }
+
+  document.getElementById("deleteRecordBtn").addEventListener("click", openDeleteModal);
+
   // ===== INIT =====
   setActiveTab();
   // Auto-unlock if this device remembered the password within 30 days
