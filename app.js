@@ -10,6 +10,27 @@
   const SUPABASE_KEY = "sb_publishable_D2PqYQoJjZ8koEM9NPvmeg_KB_Wa66H";
   const HCP_CREATE_FN = `${SUPABASE_URL}/functions/v1/hcp-create-customer`;
 
+  // ── Element getters (safe — elements may be in modals) ──
+  const el = (id) => document.getElementById(id);
+  const statusLeft    = () => el("statusLeft");
+  const countShown    = () => el("countShown");
+  const searchBox     = () => el("searchBox");
+  const leadForm      = () => el("leadForm");
+  const serviceForm   = () => el("serviceForm");
+  const formTitle     = () => el("formTitle");
+  const formPill      = () => el("formPill");
+  const prospectTable = () => el("prospectTable");
+  const prospectBody  = () => el("prospectBody");
+  const serviceTable  = () => el("serviceTable");
+  const serviceBody   = () => el("serviceBody");
+  const logTitle      = () => el("logTitle");
+  const submitBtn     = () => el("submitBtn");
+  const svcSubmitBtn  = () => el("svcSubmitBtn");
+  const refreshBtn    = () => el("refreshBtn");
+  const downloadCsvBtn  = () => el("downloadCsvBtn");
+  const downloadXlsxBtn = () => el("downloadXlsxBtn");
+
+
   // ===== ELEMENTS =====
   const gateOverlay = document.getElementById("gateOverlay");
   const gatePassword = document.getElementById("gatePassword");
@@ -19,28 +40,11 @@
   const tabProspects = document.getElementById("tabProspects");
   const tabService = document.getElementById("tabService");
 
-  const leadForm = document.getElementById("leadForm");
-  const serviceForm = document.getElementById("serviceForm");
 
-  const formTitle = document.getElementById("formTitle");
-  const formPill = document.getElementById("formPill");
-  const submitBtn = document.getElementById("submitBtn");
-  const svcSubmitBtn = document.getElementById("svcSubmitBtn");
 
-  const logTitle = document.getElementById("logTitle");
 
-  const prospectTable = document.getElementById("prospectTable");
-  const prospectBody = document.getElementById("prospectBody");
-  const serviceTable = document.getElementById("serviceTable");
-  const serviceBody = document.getElementById("serviceBody");
 
-  const searchBox = document.getElementById("searchBox");
-  const refreshBtn = document.getElementById("refreshBtn");
-  const downloadCsvBtn = document.getElementById("downloadCsvBtn");
-  const downloadXlsxBtn = document.getElementById("downloadXlsxBtn");
 
-  const statusLeft = document.getElementById("statusLeft");
-  const countShown = document.getElementById("countShown");
 
   // ===== STATE =====
   let unlocked = false;
@@ -71,7 +75,7 @@
 
   const setStatus = (kind, msg) => {
     const cls = kind === "ok" ? "badge-ok" : (kind === "bad" ? "badge-bad" : "badge-warn");
-    statusLeft.innerHTML = `Status: <span class="${cls}">${escapeHtml(msg)}</span>`;
+    statusLeft().innerHTML = `Status: <span class="${cls}">${escapeHtml(msg)}</span>`;
   };
 
   function downloadBlob(filename, blob) {
@@ -156,18 +160,18 @@
       tabProspects.classList.add("active");
       tabService.classList.remove("active");
 
-      leadForm.style.display = "";
-      serviceForm.style.display = "none";
+      leadForm().style.display = "";
+      serviceForm().style.display = "none";
 
-      prospectTable.style.display = "";
-      serviceTable.style.display = "none";
+      prospectTable().style.display = "";
+      serviceTable().style.display = "none";
 
-      formTitle.childNodes[0].textContent = "New Prospect Lead Entry ";
+      formTitle().childNodes[0].textContent = "New Prospect Lead Entry ";
       formPill.textContent = "Creates next 5-digit Prospect ID";
-      submitBtn.textContent = "Submit Prospect";
+      submitBtn().textContent = "Submit Prospect";
 
-      logTitle.innerHTML = `Prospect ID Log <span class="pill">Read-only</span>`;
-      searchBox.placeholder = "Search ID / name / builder / phone…";
+      logTitle().innerHTML = `Prospect ID Log <span class="pill">Read-only</span>`;
+      searchBox().placeholder = "Search ID / name / builder / phone…";
       const neb = document.getElementById("newEntryBtn");
       if (neb) neb.textContent = "＋ New Prospect";
       const mt = document.getElementById("entryModalTitle");
@@ -182,18 +186,18 @@
       tabProspects.classList.remove("active");
       tabService.classList.add("active");
 
-      leadForm.style.display = "none";
-      serviceForm.style.display = "";
+      leadForm().style.display = "none";
+      serviceForm().style.display = "";
 
-      prospectTable.style.display = "none";
-      serviceTable.style.display = "";
+      prospectTable().style.display = "none";
+      serviceTable().style.display = "";
 
-      formTitle.childNodes[0].textContent = "New Service Customer Entry ";
+      formTitle().childNodes[0].textContent = "New Service Customer Entry ";
       formPill.textContent = "Creates next Service Customer ID";
-      svcSubmitBtn.textContent = "Submit Service Customer";
+      svcSubmitBtn().textContent = "Submit Service Customer";
 
-      logTitle.innerHTML = `Service Customer ID Log <span class="pill">Read-only</span>`;
-      searchBox.placeholder = "Search ID / name / phone / email…";
+      logTitle().innerHTML = `Service Customer ID Log <span class="pill">Read-only</span>`;
+      searchBox().placeholder = "Search ID / name / phone / email…";
       const neb2 = document.getElementById("newEntryBtn");
       if (neb2) neb2.textContent = "＋ New Service Customer";
       const mt2 = document.getElementById("entryModalTitle");
@@ -283,11 +287,11 @@
 
   function renderProspects(filtered) {
     if (!filtered.length) {
-      prospectBody.innerHTML = `<tr><td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">No matching rows.</td></tr>`;
+      prospectBody().innerHTML = `<tr><td colspan="15" style="padding:14px; color: rgba(159,176,208,.85);">No matching rows.</td></tr>`;
       return;
     }
 
-    prospectBody.innerHTML = filtered.map(r => `
+    prospectBody().innerHTML = filtered.map(r => `
       <tr>
         <td>${escapeHtml(r.prospect_id)}</td>
         <td>${escapeHtml(r.entered_by)}</td>
@@ -310,11 +314,11 @@
 
   function renderService(filtered) {
     if (!filtered.length) {
-      serviceBody.innerHTML = `<tr><td colspan="14" style="padding:14px; color: rgba(159,176,208,.85);">No matching rows.</td></tr>`;
+      serviceBody().innerHTML = `<tr><td colspan="14" style="padding:14px; color: rgba(159,176,208,.85);">No matching rows.</td></tr>`;
       return;
     }
 
-    serviceBody.innerHTML = filtered.map(r => `
+    serviceBody().innerHTML = filtered.map(r => `
       <tr>
         <td>${escapeHtml(r.service_id)}</td>
         <td>${escapeHtml(r.entered_by)}</td>
@@ -335,95 +339,84 @@
   }
 
   function renderAndCount() {
-    const q = normalize(searchBox.value).toLowerCase();
+    const q = normalize(searchBox().value).toLowerCase();
     if (view === "prospects") {
       const filtered = q ? prospectRows.filter(r => prospectSearchString(r).includes(q)) : prospectRows.slice();
       renderProspects(filtered);
-      countShown.textContent = String(filtered.length);
+      countShown().textContent = String(filtered.length);
     } else {
       const filtered = q ? serviceRows.filter(r => serviceSearchString(r).includes(q)) : serviceRows.slice();
       renderService(filtered);
-      countShown.textContent = String(filtered.length);
+      countShown().textContent = String(filtered.length);
     }
   }
 
-  searchBox.addEventListener("input", renderAndCount);
-  refreshBtn.addEventListener("click", () => unlocked && loadCurrentView());
+  document.addEventListener("input", function(e) { if (e.target && e.target.id === "searchBox") renderAndCount(); });
 
   // ===== SUBMIT: PROSPECT =====
-  leadForm.addEventListener("submit", async (e) => {
+  document.addEventListener("submit", async (e) => {
+    const isLead = e.target.id === "leadForm";
+    const isSvc  = e.target.id === "serviceForm";
+    if (!isLead && !isSvc) return;
     e.preventDefault();
     if (!unlocked) return;
 
-    const fd = new FormData(leadForm);
+    const fd = new FormData(e.target);
     const payload = Object.fromEntries(fd.entries());
 
-    payload.entered_by = normalize(payload.entered_by);
-    payload.entered_date = normalize(payload.entered_date);
-    payload.source = normalize(payload.source);
-
-    if (!payload.entered_by) return alert("Entered By is required.");
-    if (!payload.source) return alert("Source is required.");
-
-    try {
-      submitBtn.disabled = true;
-      setStatus("warn", "Submitting…");
-      const out = await apiPost("/api/leads", payload);
-      setStatus("ok", `Saved Prospect ID ${out.prospect_id} — creating HCP profile…`);
-      leadForm.reset();
-      closeEntryModal();
-      await loadProspects();
-      renderAndCount();
-      // Create customer in HCP with prospect tag + ID tag (non-blocking)
-      createHCPCustomer(payload, ["prospect", out.prospect_id]);
-    } catch (err) {
-      setStatus("bad", err.message || "Submit failed");
-      alert(`Submit failed: ${err.message || err}`);
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
-
-  // ===== SUBMIT: SERVICE =====
-  serviceForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!unlocked) return;
-
-    const fd = new FormData(serviceForm);
-    const payload = Object.fromEntries(fd.entries());
-
-    payload.entered_by = normalize(payload.entered_by);
-    payload.entered_date = normalize(payload.entered_date);
-    payload.first_name = normalize(payload.first_name);
-    payload.last_name = normalize(payload.last_name);
-
-    if (!payload.entered_by) return alert("Entered By is required.");
-    if (!payload.first_name) return alert("First Name is required.");
-    if (!payload.last_name) return alert("Last Name is required.");
-
-    try {
-      svcSubmitBtn.disabled = true;
-      setStatus("warn", "Submitting…");
-      const out = await apiPost("/api/service/customers", payload);
-      setStatus("ok", `Saved Service ID ${out.service_id} — creating HCP profile…`);
-      serviceForm.reset();
-      closeEntryModal();
-      await loadService();
-      renderAndCount();
-      // Create customer in HCP with service ID tag (non-blocking)
-      createHCPCustomer(payload, [out.service_id]);
-    } catch (err) {
-      setStatus("bad", err.message || "Submit failed");
-      alert(`Submit failed: ${err.message || err}`);
-    } finally {
-      svcSubmitBtn.disabled = false;
+    if (isLead) {
+      // ===== PROSPECT SUBMIT =====
+      payload.entered_by  = normalize(payload.entered_by);
+      payload.entered_date = normalize(payload.entered_date);
+      payload.source      = normalize(payload.source);
+      if (!payload.entered_by) return alert("Entered By is required.");
+      if (!payload.source)     return alert("Source is required.");
+      try {
+        if (submitBtn()) { submitBtn().disabled = true; }
+        setStatus("warn", "Submitting…");
+        const out = await apiPost("/api/leads", payload);
+        setStatus("ok", `Saved Prospect ID ${out.prospect_id} — creating HCP profile…`);
+        leadForm().reset();
+        closeEntryModal();
+        await loadProspects();
+        renderAndCount();
+        createHCPCustomer(payload, ["prospect", out.prospect_id]);
+      } catch (err) {
+        setStatus("bad", err.message || "Submit failed");
+        alert(`Submit failed: ${err.message || err}`);
+      } finally {
+        if (submitBtn()) { submitBtn().disabled = false; }
+      }
+    } else {
+      // ===== SERVICE SUBMIT =====
+      payload.entered_by  = normalize(payload.entered_by);
+      payload.entered_date = normalize(payload.entered_date);
+      payload.first_name  = normalize(payload.first_name);
+      payload.last_name   = normalize(payload.last_name);
+      if (!payload.entered_by)  return alert("Entered By is required.");
+      if (!payload.first_name)  return alert("First Name is required.");
+      if (!payload.last_name)   return alert("Last Name is required.");
+      try {
+        if (svcSubmitBtn()) { svcSubmitBtn().disabled = true; }
+        setStatus("warn", "Submitting…");
+        const out = await apiPost("/api/service/customers", payload);
+        setStatus("ok", `Saved Service ID ${out.service_id} — creating HCP profile…`);
+        serviceForm().reset();
+        closeEntryModal();
+        await loadService();
+        renderAndCount();
+        createHCPCustomer(payload, [out.service_id]);
+      } catch (err) {
+        setStatus("bad", err.message || "Submit failed");
+        alert(`Submit failed: ${err.message || err}`);
+      } finally {
+        if (svcSubmitBtn()) { svcSubmitBtn().disabled = false; }
+      }
     }
   });
 
   // ===== DOWNLOADS =====
-  downloadCsvBtn.addEventListener("click", async () => {
-    if (!unlocked) return;
-
+  async function handleCsvDownload() {
     try {
       setStatus("warn", "Preparing CSV…");
       if (view === "prospects") {
@@ -440,32 +433,27 @@
       setStatus("bad", e.message || "Download failed");
       alert(`Download failed: ${e.message || e}`);
     }
-  });
+  }
 
-  downloadXlsxBtn.addEventListener("click", async () => {
-    if (!unlocked) return;
-
+  async function handleXlsxDownload() {
     try {
       setStatus("warn", "Preparing Excel…");
       let csvText = "";
-
       if (view === "prospects") {
         const res = await apiGet("/api/export.csv?sort=asc");
         csvText = await res.text();
-        const blob = csvToXlsx(csvText);
-        downloadBlob("prospect_id_log.xls", blob);
+        downloadBlob("prospect_id_log.xls", csvToXlsx(csvText));
       } else {
         const res = await apiGet("/api/service/export.csv?sort=asc");
         csvText = await res.text();
-        const blob = csvToXlsx(csvText);
-        downloadBlob("service_customer_log.xls", blob);
+        downloadBlob("service_customer_log.xls", csvToXlsx(csvText));
       }
       setStatus("ok", "Download ready");
     } catch (e) {
       setStatus("bad", e.message || "Download failed");
       alert(`Download failed: ${e.message || e}`);
     }
-  });
+  }
 
   // ===== HCP CUSTOMER CREATION =====
   async function createHCPCustomer(payload, tags) {
@@ -613,10 +601,18 @@
     }
   }
 
-  document.getElementById("deleteRecordBtn").addEventListener("click", openDeleteModal);
-  document.getElementById("newEntryBtn").addEventListener("click", function() {
-    if (!unlocked) { alert("Please unlock the system first."); return; }
-    openEntryModal();
+  // Wire toolbar buttons safely (they exist at this point since they're in static HTML)
+  document.addEventListener("click", function(e) {
+    var t = e.target.closest("button");
+    if (!t) return;
+    var id = t.id;
+    if (id === "deleteRecordBtn") { openDeleteModal(); }
+    else if (id === "newEntryBtn") { if (!unlocked) { alert("Please unlock the system first."); return; } openEntryModal(); }
+    else if (id === "refreshBtn") { if (unlocked) loadCurrentView(); }
+    else if (id === "downloadCsvBtn") { if (unlocked) handleCsvDownload(); }
+    else if (id === "downloadXlsxBtn") { if (unlocked) handleXlsxDownload(); }
+    else if (id === "submitBtn") { var lf = leadForm(); if(lf) lf.requestSubmit(); }
+    else if (id === "svcSubmitBtn") { var sf = serviceForm(); if(sf) sf.requestSubmit(); }
   });
 
   // expose modal helpers globally
