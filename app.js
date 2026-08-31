@@ -757,8 +757,7 @@
   var _hcpSyncCandidates = [];
 
   async function openHCPSyncModal() {
-    const btn = document.getElementById("hcpSyncBtn");
-    const mode = (btn && btn.dataset && btn.dataset.mode) ? btn.dataset.mode : view;
+    const mode = view; // always use current tab
     const tag = mode === "prospect" ? "Prospect" : "Service";
     const modal = document.getElementById("hcpSyncModal");
     const body = document.getElementById("hcpSyncBody");
@@ -818,8 +817,7 @@
     });
     if (!selected.length) { alert("No customers selected."); return; }
 
-    const btn2 = document.getElementById("hcpSyncBtn");
-    const mode = (btn2 && btn2.dataset && btn2.dataset.mode) ? btn2.dataset.mode : view;
+    const mode = view; // use current tab
     const body = document.getElementById("hcpSyncBody");
     const importBtn = document.getElementById("hcpSyncImportBtn");
     importBtn.disabled = true;
