@@ -214,12 +214,16 @@
 
   tabProspects.addEventListener("click", () => {
     view = "prospects";
+    const sb = document.getElementById("hcpSyncBtn");
+    if (sb) sb.dataset.mode = "prospect";
     setActiveTab();
     if (unlocked) renderAndCount();
   });
 
   tabService.addEventListener("click", () => {
     view = "service";
+    const sb = document.getElementById("hcpSyncBtn");
+    if (sb) sb.dataset.mode = "service";
     setActiveTab();
     if (unlocked) renderAndCount();
   });
@@ -753,7 +757,8 @@
   var _hcpSyncCandidates = [];
 
   async function openHCPSyncModal() {
-    const mode = (document.getElementById("hcpSyncBtn") || {}).dataset?.mode || view;
+    const btn = document.getElementById("hcpSyncBtn");
+    const mode = (btn && btn.dataset && btn.dataset.mode) ? btn.dataset.mode : view;
     const tag = mode === "prospect" ? "Prospect" : "Service";
     const modal = document.getElementById("hcpSyncModal");
     const body = document.getElementById("hcpSyncBody");
@@ -813,7 +818,8 @@
     });
     if (!selected.length) { alert("No customers selected."); return; }
 
-    const mode = (document.getElementById("hcpSyncBtn") || {}).dataset?.mode || view;
+    const btn2 = document.getElementById("hcpSyncBtn");
+    const mode = (btn2 && btn2.dataset && btn2.dataset.mode) ? btn2.dataset.mode : view;
     const body = document.getElementById("hcpSyncBody");
     const importBtn = document.getElementById("hcpSyncImportBtn");
     importBtn.disabled = true;
