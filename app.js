@@ -769,7 +769,8 @@
 
     try {
       setStatus("warn", "Searching HCP…");
-      const data = await apiGet("/api/hcp-sync-preview?tag=" + encodeURIComponent(tag));
+      const res = await apiGet("/api/hcp-sync-preview?tag=" + encodeURIComponent(tag));
+      const data = await res.json();
       _hcpSyncCandidates = data.candidates || [];
 
       if (!_hcpSyncCandidates.length) {
