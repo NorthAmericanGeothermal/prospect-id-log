@@ -741,13 +741,122 @@
     if (id === "deleteRecordBtn") { openDeleteModal(); }
     else if (id === "newEntryBtn") { if (!unlocked) { alert("Please unlock the system first."); return; } openEntryModal(); }
     else if (id === "refreshBtn") { if (unlocked) loadCurrentView(); }
+    else if (id === "hcpSyncBtn") { if (unlocked) openHCPSyncModal(); }
+    else if (id === "hcpSyncImportBtn") { if (unlocked) importHCPSelected(); }
     else if (id === "downloadCsvBtn") { if (unlocked) handleCsvDownload(); }
     else if (id === "downloadXlsxBtn") { if (unlocked) handleXlsxDownload(); }
     else if (id === "submitBtn") { var lf = leadForm(); if(lf) { var ev = new Event("submit", {bubbles:true, cancelable:true}); lf.dispatchEvent(ev); } }
     else if (id === "svcSubmitBtn") { var sf = serviceForm(); if(sf) { var ev2 = new Event("submit", {bubbles:true, cancelable:true}); sf.dispatchEvent(ev2); } }
   });
 
+  // ===== HCP SYNC FROM HCP =====
+  var _hcpSyncCandidates = [];
+
+  async function openHCPSyncModal() {
+    const mode = (document.getElementById("hcpSyncBtn") || {}).dataset?.mode || view;
+    const tag = mode === "prospect" ? "Prospect" : "Service";
+    const modal = document.getElementById("hcpSyncModal");
+    const body = document.getElementById("hcpSyncBody");
+    const title = document.getElementById("hcpSyncTitle");
+    title.textContent = `Sync "${tag}" customers from HCP`;
+    body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">Searching HCP for customers with the <strong>' + tag + '</strong> tag but no ID number yet…</div>';
+    modal.classList.add("open");
+
+    try {
+      setStatus("warn", "Searching HCP…");
+      const res = await fetch(WORKER_BASE + "/api/hcp-sync-preview?tag=" + encodeURIComponent(tag), {
+        headers: { "X-Registration-Code": "" }
+      });
+
+      // Use the Supabase/Cloudflare worker approach via apiGet
+      const data = await apiGet("/api/hcp-sync-preview?tag=" + encodeURIComponent(tag));
+      _hcpSyncCandidates = data.candidates || [];
+
+      if (!_hcpSyncCandidates.length) {
+        body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">✅ No unregistered <strong>' + tag + '</strong> customers found in HCP. Everyone already has an ID.</div>';
+        setStatus("ok", "Sync complete — nothing to import.");
+        return;
+      }
+
+      renderSyncPreview(_hcpSyncCandidates, tag);
+      setStatus("ok", _hcpSyncCandidates.length + " unregistered customer(s) found.");
+    } catch(e) {
+      body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--red);">❌ Could not search HCP: ' + escapeHtml(e.message) + '</div>';
+      setStatus("bad", "HCP sync search failed.");
+    }
+  }
+
+  function renderSyncPreview(candidates, tag) {
+    const body = document.getElementById("hcpSyncBody");
+    let html = '<p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;">Found <strong>' + candidates.length + '</strong> HCP customer' + (candidates.length !== 1 ? 's' : '') + ' with the <strong>' + tag + '</strong> tag but no ID number. Uncheck any you don't want to import, then click Import.</p>';
+    html += '<div style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding-right:4px;">';
+    candidates.forEach(function(c, i) {
+      var name = ((c.first_name || '') + ' ' + (c.last_name || '')).trim() || 'Unknown';
+      var addr = '';
+      if (c.addresses && c.addresses.length) {
+        addr = [c.addresses[0].street, c.addresses[0].city, c.addresses[0].state, c.addresses[0].zip].filter(Boolean).join(', ');
+      }
+      html += '<label style="display:flex;align-items:flex-start;gap:12px;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;background:#fff;">';
+      html += '<input type="checkbox" checked data-idx="' + i + '" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--navy);">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:14px;font-weight:700;color:var(--text);">' + escapeHtml(name) + '</div>';
+      if (addr) html += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(addr) + '</div>';
+      if (c.email) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.email) + '</div>';
+      if (c.mobile_number) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.mobile_number) + '</div>';
+      html += '</div></label>';
+    });
+    html += '</div>';
+    body.innerHTML = html;
+    document.getElementById("hcpSyncImportBtn").style.display = "";
+  }
+
+  async function importHCPSelected() {
+    const checkboxes = document.querySelectorAll("#hcpSyncBody input[type=checkbox]");
+    const selected = [];
+    checkboxes.forEach(function(cb) {
+      if (cb.checked) selected.push(_hcpSyncCandidates[parseInt(cb.dataset.idx)]);
+    });
+    if (!selected.length) { alert("No customers selected."); return; }
+
+    const mode = (document.getElementById("hcpSyncBtn") || {}).dataset?.mode || view;
+    const tag = mode === "prospect" ? "Prospect" : "Service";
+    const body = document.getElementById("hcpSyncBody");
+    document.getElementById("hcpSyncImportBtn").disabled = true;
+    body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">Importing ' + selected.length + ' customer(s)…</div>';
+
+    try {
+      setStatus("warn", "Importing " + selected.length + " customer(s)…");
+      const data = await apiPost("/api/hcp-sync-import", {
+        candidates: selected,
+        mode: mode,
+        tag: tag,
+      });
+      const imported = data.imported || 0;
+      const failed = data.failed || 0;
+      body.innerHTML = '<div style="padding:2rem;text-align:center;">' +
+        '<div style="font-size:32px;margin-bottom:12px;">✅</div>' +
+        '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;">' + imported + ' customer' + (imported !== 1 ? 's' : '') + ' imported!</div>' +
+        (failed ? '<div style="font-size:13px;color:var(--red);">' + failed + ' failed — check console.</div>' : '') +
+        '</div>';
+      setStatus("ok", imported + " imported from HCP.");
+      // Refresh the table
+      if (unlocked) loadCurrentView();
+    } catch(e) {
+      body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--red);">❌ Import failed: ' + escapeHtml(e.message) + '</div>';
+      setStatus("bad", "Import failed.");
+    } finally {
+      document.getElementById("hcpSyncImportBtn").disabled = false;
+    }
+  }
+
+  function escapeHtml(s) {
+    return (s == null ? "" : String(s))
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  }
+
   // expose modal helpers globally
+
   window.openEntryModal = openEntryModal;
   window.tagExistingHCPCustomer = tagExistingHCPCustomer;
   window.createNewHCPAnyway = createNewHCPAnyway;
