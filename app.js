@@ -764,11 +764,6 @@
 
     try {
       setStatus("warn", "Searching HCP…");
-      const res = await fetch(WORKER_BASE + "/api/hcp-sync-preview?tag=" + encodeURIComponent(tag), {
-        headers: { "X-Registration-Code": "" }
-      });
-
-      // Use the Supabase/Cloudflare worker approach via apiGet
       const data = await apiGet("/api/hcp-sync-preview?tag=" + encodeURIComponent(tag));
       _hcpSyncCandidates = data.candidates || [];
 
