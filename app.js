@@ -819,34 +819,76 @@
     if (!selected.length) { alert("No customers selected."); return; }
 
     const mode = (document.getElementById("hcpSyncBtn") || {}).dataset?.mode || view;
-    const tag = mode === "prospect" ? "Prospect" : "Service";
     const body = document.getElementById("hcpSyncBody");
-    document.getElementById("hcpSyncImportBtn").disabled = true;
-    body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">Importing ' + selected.length + ' customer(s)…</div>';
+    const importBtn = document.getElementById("hcpSyncImportBtn");
+    importBtn.disabled = true;
+    const total = selected.length;
+    let imported = 0;
+    let failed = 0;
+    let failedNames = [];
 
-    try {
-      setStatus("warn", "Importing " + selected.length + " customer(s)…");
-      const data = await apiPost("/api/hcp-sync-import", {
-        candidates: selected,
-        mode: mode,
-        tag: tag,
-      });
-      const imported = data.imported || 0;
-      const failed = data.failed || 0;
-      body.innerHTML = '<div style="padding:2rem;text-align:center;">' +
-        '<div style="font-size:32px;margin-bottom:12px;">✅</div>' +
-        '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;">' + imported + ' customer' + (imported !== 1 ? 's' : '') + ' imported!</div>' +
-        (failed ? '<div style="font-size:13px;color:var(--red);">' + failed + ' failed — check console.</div>' : '') +
+    // Show progress UI
+    function renderProgress(current, name) {
+      const pct = Math.round((current / total) * 100);
+      body.innerHTML =
+        '<div style="padding:1.5rem 1rem;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Importing customers…</div>' +
+        '<div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Please wait — do not close this window.</div>' +
+        '<div style="background:var(--border);border-radius:20px;height:10px;overflow:hidden;margin-bottom:10px;">' +
+          '<div id="syncProgressBar" style="height:100%;background:#7c3aed;border-radius:20px;transition:width .3s;width:' + pct + '%"></div>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:16px;">' +
+          '<span>' + current + ' of ' + total + ' done</span>' +
+          '<span>' + pct + '%</span>' +
+        '</div>' +
+        '<div style="font-size:13px;color:var(--text-muted);background:#f8fafc;border-radius:8px;padding:10px 14px;border:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' +
+          '⟳ ' + escapeHtml(name || "Processing…") +
+        '</div>' +
         '</div>';
-      setStatus("ok", imported + " imported from HCP.");
-      // Refresh the table
-      if (unlocked) loadCurrentView();
-    } catch(e) {
-      body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--red);">❌ Import failed: ' + escapeHtml(e.message) + '</div>';
-      setStatus("bad", "Import failed.");
-    } finally {
-      document.getElementById("hcpSyncImportBtn").disabled = false;
     }
+
+    renderProgress(0, selected[0] ? ((selected[0].first_name || "") + " " + (selected[0].last_name || "")).trim() : "");
+    setStatus("warn", "Importing 0 of " + total + "…");
+
+    // Process one at a time so we can show progress
+    for (let i = 0; i < selected.length; i++) {
+      const c = selected[i];
+      const name = ((c.first_name || "") + " " + (c.last_name || "")).trim();
+      renderProgress(i, name);
+
+      try {
+        const data = await apiPost("/api/hcp-sync-import", {
+          candidates: [c],
+          mode: mode,
+        });
+        if (data.imported) imported++;
+        else { failed++; failedNames.push(name); }
+      } catch(e) {
+        failed++;
+        failedNames.push(name);
+        console.warn("Import failed for", name, e);
+      }
+
+      setStatus("warn", "Importing " + (i + 1) + " of " + total + "…");
+    }
+
+    // Done
+    renderProgress(total, "Complete!");
+    body.innerHTML =
+      '<div style="padding:2rem;text-align:center;">' +
+      '<div style="font-size:48px;margin-bottom:14px;">' + (failed === 0 ? "✅" : "⚠️") + '</div>' +
+      '<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;">' +
+        imported + ' customer' + (imported !== 1 ? "s" : "") + ' imported!' +
+      '</div>' +
+      (failed > 0
+        ? '<div style="font-size:13px;color:var(--red);margin-top:8px;">' + failed + ' could not be imported: ' + failedNames.map(escapeHtml).join(", ") + '</div>'
+        : '<div style="font-size:13px;color:var(--green);margin-top:6px;">All done — IDs assigned and HCP profiles tagged.</div>'
+      ) +
+      '</div>';
+
+    setStatus("ok", imported + " of " + total + " imported from HCP.");
+    importBtn.disabled = false;
+    if (unlocked) loadCurrentView();
   }
 
   function escapeHtml(s) {
