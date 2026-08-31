@@ -891,12 +891,6 @@
     if (unlocked) loadCurrentView();
   }
 
-  function escapeHtml(s) {
-    return (s == null ? "" : String(s))
-      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-  }
-
   // expose modal helpers globally
 
   window.openEntryModal = openEntryModal;
