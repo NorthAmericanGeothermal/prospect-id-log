@@ -810,18 +810,23 @@
   } // end renderSyncPreview
 
   async function importHCPSelected() {
+    // Read checked state from checkboxes, fall back to all candidates if none found
     const checkboxes = document.querySelectorAll("#hcpSyncBody input[type=checkbox]");
     const selected = [];
-    checkboxes.forEach(function(cb) {
-      if (cb.checked) selected.push(_hcpSyncCandidates[parseInt(cb.dataset.idx)]);
-    });
-    if (!selected.length) { alert("No customers selected."); return; }
+    if (checkboxes.length > 0) {
+      checkboxes.forEach(function(cb) {
+        if (cb.checked) selected.push(_hcpSyncCandidates[parseInt(cb.dataset.idx)]);
+      });
+    }
+    // If no checkboxes found (UI already replaced), use all candidates
+    const toImport = selected.length > 0 ? selected : _hcpSyncCandidates.slice();
+    if (!toImport.length) return;
 
-    const mode = view; // use current tab
+    const mode = view;
     const body = document.getElementById("hcpSyncBody");
     const importBtn = document.getElementById("hcpSyncImportBtn");
     importBtn.disabled = true;
-    const total = selected.length;
+    const total = toImport.length;
     let imported = 0;
     let failed = 0;
     let failedNames = [];
@@ -846,12 +851,12 @@
         '</div>';
     }
 
-    renderProgress(0, selected[0] ? ((selected[0].first_name || "") + " " + (selected[0].last_name || "")).trim() : "");
+    renderProgress(0, toImport[0] ? ((toImport[0].first_name || "") + " " + (toImport[0].last_name || "")).trim() : "");
     setStatus("warn", "Importing 0 of " + total + "…");
 
     // Process one at a time so we can show progress
-    for (let i = 0; i < selected.length; i++) {
-      const c = selected[i];
+    for (let i = 0; i < toImport.length; i++) {
+      const c = toImport[i];
       const name = ((c.first_name || "") + " " + (c.last_name || "")).trim();
       renderProgress(i, name);
 
@@ -871,22 +876,22 @@
       setStatus("warn", "Importing " + (i + 1) + " of " + total + "…");
     }
 
-    // Done
-    renderProgress(total, "Complete!");
-    body.innerHTML =
-      '<div style="padding:2rem;text-align:center;">' +
-      '<div style="font-size:48px;margin-bottom:14px;">' + (failed === 0 ? "✅" : "⚠️") + '</div>' +
-      '<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;">' +
-        imported + ' customer' + (imported !== 1 ? "s" : "") + ' imported!' +
-      '</div>' +
-      (failed > 0
-        ? '<div style="font-size:13px;color:var(--red);margin-top:8px;">' + failed + ' could not be imported: ' + failedNames.map(escapeHtml).join(", ") + '</div>'
-        : '<div style="font-size:13px;color:var(--green);margin-top:6px;">All done — IDs assigned and HCP profiles tagged.</div>'
-      ) +
-      '</div>';
-
-    setStatus("ok", imported + " of " + total + " imported from HCP.");
+    // Done — close modal and show toast
+    document.getElementById("hcpSyncModal").style.display = "none";
     importBtn.disabled = false;
+    _hcpSyncCandidates = [];
+    const msg = failed === 0
+      ? "✅ " + imported + " customer" + (imported !== 1 ? "s" : "") + " imported & tagged in HCP!"
+      : "⚠️ " + imported + " imported, " + failed + " failed: " + failedNames.join(", ");
+    setStatus("ok", imported + " of " + total + " imported from HCP.");
+    // Show toast
+    const t = document.getElementById("toast");
+    if (t) {
+      t.textContent = msg;
+      t.className = "toast show " + (failed === 0 ? "ok" : "err");
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function(){ t.className = "toast"; }, 4000);
+    }
     if (unlocked) loadCurrentView();
   }
 
