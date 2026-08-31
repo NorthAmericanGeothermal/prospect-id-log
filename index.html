@@ -759,18 +759,18 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 </div>
 
 <!-- HCP SYNC MODAL -->
-<div class="sync-modal-bg" id="hcpSyncModal">
+<div class="sync-modal-bg" id="hcpSyncModal" style="display:none;" onclick="if(event.target===this)document.getElementById('hcpSyncModal').style.display='none'">
   <div class="sync-modal">
     <div class="sync-modal-hdr">
       <div class="sync-modal-title" id="hcpSyncTitle">Sync from HCP</div>
-      <button class="sync-modal-close" onclick="closeModal('hcpSyncModal')">&#x2715;</button>
+      <button class="sync-modal-close" onclick="document.getElementById('hcpSyncModal').style.display='none'">&#x2715;</button>
     </div>
     <div class="sync-modal-body" id="hcpSyncBody">
       <div style="padding:2rem;text-align:center;color:var(--text-muted);">Loading…</div>
     </div>
     <div class="sync-modal-footer">
-      <button class="sync-cancel-btn" onclick="closeModal('hcpSyncModal')">Cancel</button>
-      <button class="sync-import-btn" id="hcpSyncImportBtn" onclick="window.importHCPSelected()">⬇️ Import Selected</button>
+      <button class="sync-cancel-btn" onclick="document.getElementById('hcpSyncModal').style.display='none'">Cancel</button>
+      <button class="sync-import-btn" id="hcpSyncImportBtn" onclick="window.importHCPSelected && window.importHCPSelected()">⬇️ Import Selected</button>
     </div>
   </div>
 </div>
