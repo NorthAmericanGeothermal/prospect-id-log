@@ -788,7 +788,7 @@
 
   function renderSyncPreview(candidates, tag) {
     const body = document.getElementById("hcpSyncBody");
-    let html = '<p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;">Found <strong>' + candidates.length + '</strong> HCP customer' + (candidates.length !== 1 ? 's' : '') + ' with the <strong>' + tag + '</strong> tag but no ID number. Uncheck any you don't want to import, then click Import.</p>';
+    let html = '<p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;">Found <strong>' + candidates.length + '</strong> HCP customer' + (candidates.length !== 1 ? 's' : '') + ' with the <strong>' + tag + '</strong> tag but no ID number. Uncheck any you do not want to import, then click Import.</p>';
     html += '<div style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding-right:4px;">';
     candidates.forEach(function(c, i) {
       var name = ((c.first_name || '') + ' ' + (c.last_name || '')).trim() || 'Unknown';
