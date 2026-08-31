@@ -759,7 +759,7 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 </div>
 
 <!-- HCP SYNC MODAL -->
-<div class="sync-modal-bg modal-bg" id="hcpSyncModal">
+<div class="sync-modal-bg" id="hcpSyncModal">
   <div class="sync-modal">
     <div class="sync-modal-hdr">
       <div class="sync-modal-title" id="hcpSyncTitle">Sync from HCP</div>
@@ -768,9 +768,28 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
     <div class="sync-modal-body" id="hcpSyncBody">
       <div style="padding:2rem;text-align:center;color:var(--text-muted);">Loading…</div>
     </div>
-    <div class="sync-modal-footer"> 
+    <div class="sync-modal-footer">
       <button class="sync-cancel-btn" onclick="closeModal('hcpSyncModal')">Cancel</button>
-      <button class="sync-import-btn" id="hcpSyncImportBtn" style="display:none" onclick="importHCPSelected()">⬇️ Import Selected</button>
+      <button class="sync-import-btn" id="hcpSyncImportBtn" onclick="window.importHCPSelected()">⬇️ Import Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHO IS LOGGED IN MODAL -->
+<div class="sync-modal-bg" id="nameModal" style="display:none;z-index:800;">
+  <div class="sync-modal" style="max-width:360px;">
+    <div class="sync-modal-hdr" style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);">
+      <div class="sync-modal-title">👋 Who are you?</div>
+    </div>
+    <div class="sync-modal-body" style="padding:1.5rem;">
+      <p style="font-size:15px;color:var(--text2);margin-bottom:16px;line-height:1.6;">Enter your name so entries are tracked correctly. You only need to do this once on this device.</p>
+      <label style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Your Name</label>
+      <input type="text" id="nameInput" placeholder="e.g. Michael, Brandon, Richard…"
+        style="width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:16px;font-family:inherit;background:#f8fafc;"
+        onkeydown="if(event.key==='Enter') window.saveName()">
+    </div>
+    <div class="sync-modal-footer">
+      <button class="sync-import-btn" style="width:100%;" onclick="window.saveName()">Save My Name →</button>
     </div>
   </div>
 </div>
