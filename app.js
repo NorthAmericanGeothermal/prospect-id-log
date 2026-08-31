@@ -904,6 +904,8 @@
   window.delStep1 = delStep1;
   window.delStep2 = delStep2;
   window.delStep3 = delStep3;
+  window.importHCPSelected = importHCPSelected;
+  window.openHCPSyncModal = openHCPSyncModal;
 
   // ===== INIT =====
   try {
