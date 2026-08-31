@@ -447,6 +447,41 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 .dup-modal-footer{padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;flex-shrink:0;display:flex;justify-content:flex-end;}
 .dup-create-anyway{padding:9px 18px;border:1.5px solid var(--border-dark);border-radius:var(--radius);background:#fff;color:var(--text-mid);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
 .dup-create-anyway:hover{background:var(--bg);border-color:var(--accent);color:var(--accent);}
+
+/* ── HCP SYNC MODAL ── */
+.sync-modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,22,40,.55);backdrop-filter:blur(4px);
+  z-index:450;align-items:flex-start;justify-content:center;
+  padding-top:60px;
+}
+.sync-modal-bg.open{display:flex;}
+.sync-modal{
+  background:#fff;border-radius:var(--radius-lg);
+  width:560px;max-width:96vw;max-height:88vh;
+  box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;
+}
+.sync-modal-hdr{
+  background:linear-gradient(135deg,#5b21b6 0%,#7c3aed 100%);
+  padding:16px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.sync-modal-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.sync-modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;padding:0 4px;}
+.sync-modal-close:hover{color:#fff;}
+.sync-modal-body{padding:1.25rem;overflow-y:auto;flex:1;}
+.sync-modal-footer{padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.sync-import-btn{
+  padding:10px 20px;border:none;border-radius:var(--radius);
+  background:#7c3aed;color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .15s;display:none;
+}
+.sync-import-btn:hover{background:#6d28d9;}
+.sync-import-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sync-cancel-btn{
+  padding:10px 18px;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:#fff;color:var(--text-mid);font-size:14px;font-weight:600;cursor:pointer;
+}
+.sync-cancel-btn:hover{border-color:var(--text-mid);}
 </style>
 </head>
 <body>
@@ -494,6 +529,7 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
         <div class="toolbar">
           <input type="text" id="searchBox" placeholder="Search name, ID, phone, email…">
           <button class="icon-btn" id="refreshBtn">⟳ Refresh</button>
+          <button class="icon-btn" id="hcpSyncBtn" style="border-color:#7c3aed;color:#7c3aed;">⟳ Sync from HCP</button>
           <button class="new-entry-btn" id="newEntryBtn">＋ New Prospect</button>
           <button class="dl-btn" id="downloadCsvBtn">↓ CSV</button>
           <button class="dl-btn" id="downloadXlsxBtn">↓ Excel</button>
@@ -718,6 +754,23 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
     <div class="dup-modal-body" id="dup-modal-body"></div>
     <div class="dup-modal-footer">
       <button class="dup-create-anyway" onclick="createNewHCPAnyway()">None of these — create new profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- HCP SYNC MODAL -->
+<div class="sync-modal-bg modal-bg" id="hcpSyncModal">
+  <div class="sync-modal">
+    <div class="sync-modal-hdr">
+      <div class="sync-modal-title" id="hcpSyncTitle">Sync from HCP</div>
+      <button class="sync-modal-close" onclick="closeModal('hcpSyncModal')">&#x2715;</button>
+    </div>
+    <div class="sync-modal-body" id="hcpSyncBody">
+      <div style="padding:2rem;text-align:center;color:var(--text-muted);">Loading…</div>
+    </div>
+    <div class="sync-modal-footer">
+      <button class="sync-cancel-btn" onclick="closeModal('hcpSyncModal')">Cancel</button>
+      <button class="sync-import-btn" id="hcpSyncImportBtn" style="display:none" onclick="importHCPSelected()">⬇️ Import Selected</button>
     </div>
   </div>
 </div>
