@@ -808,8 +808,7 @@
     });
     html += '</div>';
     body.innerHTML = html;
-    document.getElementById("hcpSyncImportBtn").style.display = "";
-  }
+  } // end renderSyncPreview
 
   async function importHCPSelected() {
     const checkboxes = document.querySelectorAll("#hcpSyncBody input[type=checkbox]");
