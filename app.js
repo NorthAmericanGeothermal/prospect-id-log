@@ -765,7 +765,7 @@
     const title = document.getElementById("hcpSyncTitle");
     title.textContent = `Sync "${tag}" customers from HCP`;
     body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">Searching HCP for customers with the <strong>' + tag + '</strong> tag but no ID number yet…</div>';
-    modal.classList.add("open");
+    modal.style.display = "flex";
 
     try {
       setStatus("warn", "Searching HCP…");
