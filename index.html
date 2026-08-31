@@ -471,7 +471,6 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
 .sync-modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;padding:0 4px;}
 .sync-modal-close:hover{color:#fff;}
 .sync-modal-body{padding:1.25rem;overflow-y:auto;flex:1;}
-.sync-modal-footer{padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;gap:10px;}
 .sync-import-btn{
   padding:10px 20px;border:none;border-radius:var(--radius);
   background:#7c3aed;color:#fff;font-size:14px;font-weight:700;
@@ -770,9 +769,9 @@ tbody tr:nth-child(even):hover td{background:#f4f7ff;}
     <div class="sync-modal-body" id="hcpSyncBody">
       <div style="padding:2rem;text-align:center;color:var(--text-muted);">Loading…</div>
     </div>
-    <div class="sync-modal-footer">
-      <button class="sync-cancel-btn" onclick="document.getElementById('hcpSyncModal').style.display='none'">Cancel</button>
-      <button class="sync-import-btn" id="hcpSyncImportBtn" onclick="window.importHCPSelected && window.importHCPSelected()">⬇️ Import Selected</button>
+    <div style="padding:14px 20px;border-top:1px solid #e2e8f0;background:#fafbfc;display:flex;gap:10px;flex-shrink:0;">
+      <button onclick="document.getElementById('hcpSyncModal').style.display='none'" style="padding:10px 18px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
+      <button id="hcpSyncImportBtn" onclick="window.importHCPSelected && window.importHCPSelected()" style="flex:1;padding:10px 18px;border:none;border-radius:10px;background:#7c3aed;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ Import Selected</button>
     </div>
   </div>
 </div>
