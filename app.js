@@ -755,9 +755,11 @@
 
   // ===== HCP SYNC FROM HCP =====
   var _hcpSyncCandidates = [];
+  var _hcpSyncMode = "prospect";
 
-  async function openHCPSyncModal() {
-    const mode = view; // always use current tab
+  async function openHCPSyncModal(mode) {
+    if (!mode) mode = view;
+    _hcpSyncMode = mode;
     const tag = mode === "prospect" ? "Prospect" : "Service";
     const modal = document.getElementById("hcpSyncModal");
     const body = document.getElementById("hcpSyncBody");
