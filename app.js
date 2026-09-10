@@ -755,6 +755,7 @@
   var _hcpSyncCandidates = [];
   var _hcpSyncMode = "prospect";
   var _hcpIgnoreList = JSON.parse(localStorage.getItem("nageo_hcp_ignore") || "[]");
+  var currentUserName = localStorage.getItem("nageo_user_name") || "";
 
   async function openHCPSyncModal(mode) {
     if (!mode) mode = view;
@@ -871,6 +872,7 @@
     renderProgress(0, toImport[0] ? ((toImport[0].first_name || "") + " " + (toImport[0].last_name || "")).trim() : "");
     setStatus("warn", "Importing 0 of " + total + "…");
 
+    console.log("Starting import of", toImport.length, "candidates, mode:", mode);
     // Process one at a time so we can show progress
     for (let i = 0; i < toImport.length; i++) {
       const c = toImport[i];
@@ -878,11 +880,13 @@
       renderProgress(i, name);
 
       try {
+        console.log("Posting candidate", i+1, name, "mode:", mode);
         const data = await apiPost("/api/hcp-sync-import", {
           candidates: [c],
           mode: mode,
           entered_by: currentUserName || "HCP Sync",
         });
+        console.log("Response for", name, ":", data);
         if (data.imported) imported++;
         else { failed++; failedNames.push(name); }
       } catch(e) {
