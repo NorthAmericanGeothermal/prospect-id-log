@@ -790,18 +790,25 @@
 
   function renderSyncPreview(candidates, tag) {
     const body = document.getElementById("hcpSyncBody");
-    let html = '<p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;">Found <strong>' + candidates.length + '</strong> HCP customer' + (candidates.length !== 1 ? 's' : '') + ' with the <strong>' + tag + '</strong> tag but no ID number. Uncheck any you do not want to import, then click Import.</p>';
-    html += '<div style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding-right:4px;">';
+    const newOnes = candidates.filter(function(c) { return !c._already_tagged; });
+    const taggedOnes = candidates.filter(function(c) { return c._already_tagged; });
+    let html = '<p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;">Found <strong>' + candidates.length + '</strong> HCP customer' + (candidates.length !== 1 ? 's' : '') + ' with the <strong>' + tag + '</strong> tag but no ID in our log. Uncheck any you do not want to import.</p>';
+    html += '<div style="display:flex;flex-direction:column;gap:8px;max-height:45vh;overflow-y:auto;padding-right:4px;">';
     candidates.forEach(function(c, i) {
       var name = ((c.first_name || '') + ' ' + (c.last_name || '')).trim() || 'Unknown';
       var addr = '';
       if (c.addresses && c.addresses.length) {
         addr = [c.addresses[0].street, c.addresses[0].city, c.addresses[0].state, c.addresses[0].zip].filter(Boolean).join(', ');
       }
-      html += '<label style="display:flex;align-items:flex-start;gap:12px;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;background:#fff;">';
+      var alreadyTagged = c._already_tagged;
+      var borderColor = alreadyTagged ? '#f59e0b' : 'var(--border)';
+      html += '<label style="display:flex;align-items:flex-start;gap:12px;padding:12px;border:1.5px solid ' + borderColor + ';border-radius:var(--radius);cursor:pointer;background:#fff;">';
       html += '<input type="checkbox" checked data-idx="' + i + '" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--navy);">';
       html += '<div style="flex:1;min-width:0;">';
       html += '<div style="font-size:14px;font-weight:700;color:var(--text);">' + escapeHtml(name) + '</div>';
+      if (alreadyTagged) {
+        html += '<div style="font-size:11px;font-weight:600;color:#d97706;margin-top:2px;">⚠️ Already tagged with ' + escapeHtml(c._existing_tag) + ' in HCP but not in our log — importing will add to log only</div>';
+      }
       if (addr) html += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(addr) + '</div>';
       if (c.email) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.email) + '</div>';
       if (c.mobile_number) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.mobile_number) + '</div>';
@@ -866,6 +873,7 @@
         const data = await apiPost("/api/hcp-sync-import", {
           candidates: [c],
           mode: mode,
+          entered_by: currentUserName || "HCP Sync",
         });
         if (data.imported) imported++;
         else { failed++; failedNames.push(name); }
