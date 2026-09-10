@@ -745,7 +745,6 @@
     if (id === "deleteRecordBtn") { openDeleteModal(); }
     else if (id === "newEntryBtn") { if (!unlocked) { alert("Please unlock the system first."); return; } openEntryModal(); }
     else if (id === "refreshBtn") { if (unlocked) loadCurrentView(); }
-    else if (id === "hcpSyncImportBtn") { if (unlocked) importHCPSelected(); }
     else if (id === "downloadCsvBtn") { if (unlocked) handleCsvDownload(); }
     else if (id === "downloadXlsxBtn") { if (unlocked) handleXlsxDownload(); }
     else if (id === "submitBtn") { var lf = leadForm(); if(lf) { var ev = new Event("submit", {bubbles:true, cancelable:true}); lf.dispatchEvent(ev); } }
@@ -824,7 +823,10 @@
     body.innerHTML = html;
   } // end renderSyncPreview
 
+  var _importRunning = false;
   async function importHCPSelected() {
+    if (_importRunning) return;
+    _importRunning = true;
     // Read checked state from checkboxes, fall back to all candidates if none found
     const checkboxes = document.querySelectorAll("#hcpSyncBody input[type=checkbox]");
     const selected = [];
@@ -835,7 +837,7 @@
     }
     // If no checkboxes found (UI already replaced), use all candidates
     const toImport = selected.length > 0 ? selected : _hcpSyncCandidates.slice();
-    if (!toImport.length) return;
+    if (!toImport.length) { _importRunning = false; return; }
 
     const mode = _hcpSyncMode || view;
     const body = document.getElementById("hcpSyncBody");
@@ -895,6 +897,7 @@
     // Done — close modal and show toast
     document.getElementById("hcpSyncModal").style.display = "none";
     importBtn.disabled = false;
+    _importRunning = false;
     _hcpSyncCandidates = [];
     const msg = failed === 0
       ? "✅ " + imported + " customer" + (imported !== 1 ? "s" : "") + " imported & tagged in HCP!"
