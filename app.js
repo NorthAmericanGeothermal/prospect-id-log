@@ -756,6 +756,7 @@
   // ===== HCP SYNC FROM HCP =====
   var _hcpSyncCandidates = [];
   var _hcpSyncMode = "prospect";
+  var _hcpIgnoreList = JSON.parse(localStorage.getItem("nageo_hcp_ignore") || "[]");
 
   async function openHCPSyncModal(mode) {
     if (!mode) mode = view;
@@ -770,7 +771,8 @@
 
     try {
       setStatus("warn", "Searching HCP…");
-      const res = await apiGet("/api/hcp-sync-preview?tag=" + encodeURIComponent(tag));
+      const ignoreParam = _hcpIgnoreList.length ? "&ignore=" + _hcpIgnoreList.join(",") : "";
+      const res = await apiGet("/api/hcp-sync-preview?tag=" + encodeURIComponent(tag) + ignoreParam);
       const data = await res.json();
       _hcpSyncCandidates = data.candidates || [];
 
@@ -812,7 +814,9 @@
       if (addr) html += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(addr) + '</div>';
       if (c.email) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.email) + '</div>';
       if (c.mobile_number) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.mobile_number) + '</div>';
-      html += '</div></label>';
+      html += '</div>';
+      html += '<button data-hcpid="' + c.id + '" data-hcpname="' + escapeHtml(name).replace(/"/g,"&quot;") + '" onclick="var b=this;window.ignoreHCPCustomer(b.dataset.hcpid,b.dataset.hcpname)" style="margin-top:6px;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">Permanently ignore this customer</button>';
+      html += '</label>';
     });
     html += '</div>';
     body.innerHTML = html;
@@ -916,7 +920,20 @@
   window.delStep1 = delStep1;
   window.delStep2 = delStep2;
   window.delStep3 = delStep3;
+  function ignoreHCPCustomer(hcpId, name) {
+    if (!confirm("Permanently ignore " + name + "? They will never appear in sync again.")) return;
+    if (!_hcpIgnoreList.includes(hcpId)) {
+      _hcpIgnoreList.push(hcpId);
+      localStorage.setItem("nageo_hcp_ignore", JSON.stringify(_hcpIgnoreList));
+    }
+    // Re-run the sync to refresh the list
+    openHCPSyncModal(_hcpSyncMode);
+  }
+  window.ignoreHCPCustomer = ignoreHCPCustomer;
   window.importHCPSelected = importHCPSelected;
+  window.ignoreHCPCustomer = ignoreHCPCustomer;
+  // Expose view so inline onclick can read current tab
+  Object.defineProperty(window, 'view', { get: function() { return view; } });
   window.openHCPSyncModal = openHCPSyncModal;
 
   // ===== INIT =====
