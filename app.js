@@ -802,13 +802,16 @@
         addr = [c.addresses[0].street, c.addresses[0].city, c.addresses[0].state, c.addresses[0].zip].filter(Boolean).join(', ');
       }
       var alreadyTagged = c._already_tagged;
-      var borderColor = alreadyTagged ? '#f59e0b' : 'var(--border)';
+      var inLogNeedsTag = c._in_log_needs_tag;
+      var borderColor = alreadyTagged ? '#f59e0b' : (inLogNeedsTag ? '#3b82f6' : 'var(--border)');
       html += '<label style="display:flex;align-items:flex-start;gap:12px;padding:12px;border:1.5px solid ' + borderColor + ';border-radius:var(--radius);cursor:pointer;background:#fff;">';
       html += '<input type="checkbox" checked data-idx="' + i + '" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--navy);">';
       html += '<div style="flex:1;min-width:0;">';
       html += '<div style="font-size:14px;font-weight:700;color:var(--text);">' + escapeHtml(name) + '</div>';
       if (alreadyTagged) {
-        html += '<div style="font-size:11px;font-weight:600;color:#d97706;margin-top:2px;">⚠️ Already tagged with ' + escapeHtml(c._existing_tag) + ' in HCP but not in our log — importing will add to log only</div>';
+        html += '<div style="font-size:11px;font-weight:600;color:#d97706;margin-top:2px;">⚠️ Already tagged with ' + escapeHtml(c._existing_tag) + ' in HCP but not in our log — will add to log</div>';
+      } else if (inLogNeedsTag) {
+        html += '<div style="font-size:11px;font-weight:600;color:#3b82f6;margin-top:2px;">ℹ️ Already in our log with ID ' + escapeHtml(c._existing_id || '?') + ' — will add that ID as HCP tag</div>';
       }
       if (addr) html += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(addr) + '</div>';
       if (c.email) html += '<div style="font-size:12px;color:var(--text-muted);">' + escapeHtml(c.email) + '</div>';
@@ -834,7 +837,7 @@
     const toImport = selected.length > 0 ? selected : _hcpSyncCandidates.slice();
     if (!toImport.length) return;
 
-    const mode = view;
+    const mode = _hcpSyncMode || view;
     const body = document.getElementById("hcpSyncBody");
     const importBtn = document.getElementById("hcpSyncImportBtn");
     importBtn.disabled = true;
@@ -931,8 +934,7 @@
   window.ignoreHCPCustomer = ignoreHCPCustomer;
   window.importHCPSelected = importHCPSelected;
   window.ignoreHCPCustomer = ignoreHCPCustomer;
-  // Expose view so inline onclick can read current tab
-  Object.defineProperty(window, 'view', { get: function() { return view; } });
+
   window.openHCPSyncModal = openHCPSyncModal;
 
   // ===== INIT =====
