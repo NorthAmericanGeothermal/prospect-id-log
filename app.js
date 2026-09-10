@@ -745,7 +745,6 @@
     if (id === "deleteRecordBtn") { openDeleteModal(); }
     else if (id === "newEntryBtn") { if (!unlocked) { alert("Please unlock the system first."); return; } openEntryModal(); }
     else if (id === "refreshBtn") { if (unlocked) loadCurrentView(); }
-    else if (id === "hcpSyncBtn") { if (unlocked) openHCPSyncModal(); }
     else if (id === "hcpSyncImportBtn") { if (unlocked) importHCPSelected(); }
     else if (id === "downloadCsvBtn") { if (unlocked) handleCsvDownload(); }
     else if (id === "downloadXlsxBtn") { if (unlocked) handleXlsxDownload(); }
