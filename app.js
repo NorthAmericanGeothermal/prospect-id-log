@@ -225,7 +225,7 @@
     const sb = document.getElementById("hcpSyncBtn");
     if (sb) sb.dataset.mode = "service";
     setActiveTab();
-    if (unlocked) renderAndCount();
+    if (unlocked) { renderAndCount(); loadCurrentView(); }
   });
 
   // ===== API =====
@@ -263,8 +263,7 @@
   async function loadCurrentView() {
     try {
       setStatus("warn", "Loading…");
-      if (view === "prospects") await loadProspects();
-      else await loadService();
+      await Promise.all([loadProspects(), loadService()]);
       setStatus("ok", "Ready");
       renderAndCount();
     } catch (e) {
