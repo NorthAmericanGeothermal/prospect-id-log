@@ -1,3 +1,4 @@
+console.log("ID Log app.js version 20261119b");
 (() => {
   // ===== CONFIG =====
   const WORKER_BASE = "https://prospect-id-cloud.nagprospects.workers.dev";
